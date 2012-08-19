@@ -1,4 +1,4 @@
-module Renderer
+module Geometry
 
 open NUnit.Framework
 open Geometry

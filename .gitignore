@@ -6,3 +6,8 @@
 #################
 *.exe
 *.dll
+**/bin
+
+# Test Result
+#############
+**/test-results

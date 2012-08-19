@@ -22,13 +22,17 @@ type vector =
  
     static member ( * ) (a: real, b: vector) = b * a
 
-    static member ( .* ) (a: vector, b: vector) : real =     
-        (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
-
-    
+/// <summary>
 /// A 3d point - defined simply as an alias for a vector.
+/// </summary>
 type point = vector
         
+/// <summary>
+/// A unit vector alias for a vector. More for implicit documentation than
+/// anything else.
+/// </summary>        
+type unit_vector = vector
+
 /// Computes the dot (or scalar) product of two vectors.
 let dot a b = 
     (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
@@ -44,7 +48,8 @@ let cross a b =
 let length (v: vector) : real = 
     (sqr v.x) + (sqr v.y) + (sqr v.z) |> sqrt
     
-let unitize v = 
+/// Computes a unit vector for a vector of arbitrary length.
+let unitize v : unit_vector = 
     let inv_length = 1.0 / length v
     {x = v.x * inv_length; y = v.y * inv_length; z = v.z * inv_length}
     
@@ -64,16 +69,25 @@ type box =
 type cylender = 
     {a: point; b: point; radius: real} 
 
+/// <summary>
 /// A ray startinng of at a given position and running off to infinity in a
 /// given direction
-type ray = {src: point; direction: vector}
+/// </summary>
+type ray = {src: point; direction: unit_vector}
 
+/// <summary>
 /// Attempts to find the point on a ray where it intersects with the given
 /// sphere.
+/// </summary>
+/// <remarks>
+/// For the maths behind how it works, check out the following links
+///   http://wiki.cgsociety.org/index.php/Ray_Sphere_Intersection
+///   http://www.siggraph.org/education/materials/HyperGraph/raytrace/rtinter1.htm
+/// <remarks>
 let ray_sphere_intersection (r : ray) (s: sphere) : double option = 
-    let dist = vector_between r.src s.centre // simplify by assuming a ray starting at (0, 0, 0)
-    let b = r.direction .* dist
-    match (sqr b) - (dist .* dist) + (sqr s.radius) with 
+    let dist = vector_between r.src s.centre
+    let b = r.direction |> dot <| dist
+    match (sqr b) - (dist |> dot <| dist) + (sqr s.radius) with 
     | n when n < 0.0 -> None
     | d_squared ->
         let d = sqrt d_squared

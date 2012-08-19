@@ -10,6 +10,11 @@
     <RootNamespace>UnitTests</RootNamespace>
     <UsePartialTypes>false</UsePartialTypes>
     <AssemblyName>UnitTests</AssemblyName>
+    <BuildOrder>
+      <BuildOrder>
+        <String>RendererTests.fs</String>
+      </BuildOrder>
+    </BuildOrder>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -34,7 +39,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="FSharp.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
     <Reference Include="nunit.core, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77">
       <Private>False</Private>
     </Reference>
@@ -44,7 +48,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" />
   <ItemGroup>
-    <Compile Include="RendererTests.fs" />
+    <Compile Include="GeometryTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Affray\Affray.fsproj">
