@@ -1,0 +1,8 @@
+# Per-user files
+################
+*.userprefs
+
+# Compiled Source
+#################
+*.exe
+*.dll

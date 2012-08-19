@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{4925A630-B079-445d-BCD4-3A9C94FE9307}") = "Affray", "Affray\Affray.fsproj", "{0D13842B-01DC-4791-9C71-CAE33B05B1FC}"
+EndProject
+Project("{4925A630-B079-445d-BCD4-3A9C94FE9307}") = "UnitTests", "UnitTests\UnitTests.fsproj", "{C6F02A00-A970-4060-9F89-3E6989DF8E8A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0D13842B-01DC-4791-9C71-CAE33B05B1FC}.Debug|x86.ActiveCfg = Debug|x86
+		{0D13842B-01DC-4791-9C71-CAE33B05B1FC}.Debug|x86.Build.0 = Debug|x86
+		{0D13842B-01DC-4791-9C71-CAE33B05B1FC}.Release|x86.ActiveCfg = Release|x86
+		{0D13842B-01DC-4791-9C71-CAE33B05B1FC}.Release|x86.Build.0 = Release|x86
+		{C6F02A00-A970-4060-9F89-3E6989DF8E8A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C6F02A00-A970-4060-9F89-3E6989DF8E8A}.Debug|x86.Build.0 = Debug|Any CPU
+		{C6F02A00-A970-4060-9F89-3E6989DF8E8A}.Release|x86.ActiveCfg = Release|Any CPU
+		{C6F02A00-A970-4060-9F89-3E6989DF8E8A}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = UnitTests\UnitTests.fsproj
+	EndGlobalSection
+EndGlobal
