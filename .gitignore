@@ -1,12 +1,14 @@
 # Per-user files
 ################
 *.userprefs
+*.suo
 
 # Compiled Source
 #################
 *.exe
 *.dll
 **/bin
+**/obj
 
 # Test Result
 #############

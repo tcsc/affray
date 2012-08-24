@@ -1,8 +1,10 @@
 module Geometry
 
 open NUnit.Framework
-open Geometry
+
+open Affray.Geometry
 open System
+open Affray.Math
 
 [<TestFixture>]
 type RaySphereIntersection() = class
@@ -20,7 +22,7 @@ type RaySphereIntersection() = class
         let s = {centre = {x = 0.0; y = 0.0; z = 0.0}; radius = 1.0}
         let r = {
             src = {x = 10.0; y = 10.0; z = 0.0}; 
-            direction = unitize {x = -10.0; y = -10.0; z = 0.5}}
+            direction = normalize {x = -10.0; y = -10.0; z = 0.5}}
         let value = ray_sphere_intersection r s 
         match ray_sphere_intersection r s with 
         | None -> Assert.Fail("Expcted a value")
@@ -33,7 +35,7 @@ type RaySphereIntersection() = class
         let s = {centre = {x = 0.0; y = 5.0; z = 0.0}; radius = 1.0}
         let r = {
             src = {x = 10.0; y = 10.0; z = 0.0}; 
-            direction = unitize {x = -10.0; y = -10.0; z = 0.5}}
+            direction = normalize {x = -10.0; y = -10.0; z = 0.5}}
         match ray_sphere_intersection r s with
         | Some n -> Assert.Fail("Expected no intersection")
         | _ -> ()

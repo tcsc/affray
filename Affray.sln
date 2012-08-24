@@ -1,26 +1,42 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{4925A630-B079-445d-BCD4-3A9C94FE9307}") = "Affray", "Affray\Affray.fsproj", "{0D13842B-01DC-4791-9C71-CAE33B05B1FC}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Affray", "Affray\Affray.fsproj", "{84EE0A8E-2159-4135-B621-96D9D66D7985}"
 EndProject
-Project("{4925A630-B079-445d-BCD4-3A9C94FE9307}") = "UnitTests", "UnitTests\UnitTests.fsproj", "{C6F02A00-A970-4060-9F89-3E6989DF8E8A}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTests", "UnitTests\UnitTests.fsproj", "{0DE0B1D2-F5EA-4709-A4A8-A00077446EA8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F08CD747-8D70-47FC-A3C3-B59A000144AE}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\packages.config = .nuget\packages.config
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{0D13842B-01DC-4791-9C71-CAE33B05B1FC}.Debug|x86.ActiveCfg = Debug|x86
-		{0D13842B-01DC-4791-9C71-CAE33B05B1FC}.Debug|x86.Build.0 = Debug|x86
-		{0D13842B-01DC-4791-9C71-CAE33B05B1FC}.Release|x86.ActiveCfg = Release|x86
-		{0D13842B-01DC-4791-9C71-CAE33B05B1FC}.Release|x86.Build.0 = Release|x86
-		{C6F02A00-A970-4060-9F89-3E6989DF8E8A}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{C6F02A00-A970-4060-9F89-3E6989DF8E8A}.Debug|x86.Build.0 = Debug|Any CPU
-		{C6F02A00-A970-4060-9F89-3E6989DF8E8A}.Release|x86.ActiveCfg = Release|Any CPU
-		{C6F02A00-A970-4060-9F89-3E6989DF8E8A}.Release|x86.Build.0 = Release|Any CPU
+		{84EE0A8E-2159-4135-B621-96D9D66D7985}.Debug|x64.ActiveCfg = Debug|x64
+		{84EE0A8E-2159-4135-B621-96D9D66D7985}.Debug|x64.Build.0 = Debug|x64
+		{84EE0A8E-2159-4135-B621-96D9D66D7985}.Debug|x86.ActiveCfg = Debug|x86
+		{84EE0A8E-2159-4135-B621-96D9D66D7985}.Debug|x86.Build.0 = Debug|x86
+		{84EE0A8E-2159-4135-B621-96D9D66D7985}.Release|x64.ActiveCfg = Release|x64
+		{84EE0A8E-2159-4135-B621-96D9D66D7985}.Release|x64.Build.0 = Release|x64
+		{84EE0A8E-2159-4135-B621-96D9D66D7985}.Release|x86.ActiveCfg = Release|x86
+		{84EE0A8E-2159-4135-B621-96D9D66D7985}.Release|x86.Build.0 = Release|x86
+		{0DE0B1D2-F5EA-4709-A4A8-A00077446EA8}.Debug|x64.ActiveCfg = Debug|x64
+		{0DE0B1D2-F5EA-4709-A4A8-A00077446EA8}.Debug|x64.Build.0 = Debug|x64
+		{0DE0B1D2-F5EA-4709-A4A8-A00077446EA8}.Debug|x86.ActiveCfg = Debug|x86
+		{0DE0B1D2-F5EA-4709-A4A8-A00077446EA8}.Debug|x86.Build.0 = Debug|x86
+		{0DE0B1D2-F5EA-4709-A4A8-A00077446EA8}.Release|x64.ActiveCfg = Release|x64
+		{0DE0B1D2-F5EA-4709-A4A8-A00077446EA8}.Release|x86.ActiveCfg = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
-		StartupItem = UnitTests\UnitTests.fsproj
+		StartupItem = Affray\Affray.fsproj
 	EndGlobalSection
 EndGlobal
