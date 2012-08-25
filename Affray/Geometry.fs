@@ -53,4 +53,7 @@ module Geometry =
             if t2 > 0.0 
                 then Some <| if t1 > 0.0 then t1 else t2 
                 else None
+
+    let sphere_normal_at (p: point) (s: sphere) = 
+        p - s.centre |> normalize
             

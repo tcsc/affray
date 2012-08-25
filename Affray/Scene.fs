@@ -1,10 +1,17 @@
 module Scene
 
+open Affray.Colour
 open Affray.Geometry
-open PointLight
 open Affray.Math
+open PointLight
 
-type obj = Sphere of sphere
+type primitive = Sphere of sphere
+
+type material = 
+    {colour: colour; opacity: float; ambient: float}
+
+type obj = 
+    {primitive: primitive; material: material}
 
 type light = PointSource of point_light
 
@@ -49,9 +56,12 @@ let add_light s l =
    
     
 let intersects (r: ray) (o: obj) = 
-    match o with
+    match o.primitive with
     | Sphere s -> ray_sphere_intersection r s
     
+let surface_normal (p: point) (o: obj) = 
+    match o.primitive with
+    | Sphere s -> sphere_normal_at p s
      
 type ray_context = {x: int; y: int; r: ray} 
    

@@ -1,6 +1,6 @@
 module PointLight
 
+open Affray.Colour
 open Affray.Geometry
-open Colour
 
 type point_light = {location: point; colour: colour}
