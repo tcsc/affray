@@ -64,34 +64,41 @@ let convert p : int32 =
     let b = int(255.0 * p.b)
     ((a &&& 0xFF) <<< 24) ||| ((r &&& 0xFF) <<< 16) ||| ((g &&& 0xFF) <<< 8) ||| (b &&& 0xFF)
 
+let blinn_phong_highlight (view_ray: ray) (light_ray: ray) (norm: unit_vector) (intensity: colour) (mat: material) : colour = 
+    match mat.highlight.intensity with 
+    | spec when spec > 0.0 ->
+        let half_vector = light_ray.direction - view_ray.direction
+        match sqrt (half_vector |> dot <| half_vector) with
+        | x when x = 0.0 -> black
+        | x -> 
+            let blinn_vector = half_vector * (1.0/x)
+            let blinn_base = max (blinn_vector |> dot <| norm) 0.0
+            let blinn_term = spec * (blinn_base ** mat.highlight.size)
+            blinn_term * intensity
+    | _ -> black
 
-let lighting_contribution (scene: scene) (l: light) (p: point) (n: unit_vector) : colour = 
-    match l with 
-    | PointSource point_light -> 
-        let light_pos = point_light.location
-        let light_beam = light_pos - p
-        if dot n light_beam < 0.0
-            then black
-            else
-                // move the starting point a miniscule amount in the direction of the surface 
-                // normal to avoid this point shadowing itself.
-                let src = p + (1e-12 * n) 
-                let light_ray = {src = src; direction = normalize light_beam}
-                if in_shadow scene light_ray 
-                    then black
-                    else 
-                        let lambert = dot light_ray.direction n
-                        point_light.colour * lambert
-
+let lighting_contribution (view_ray: ray) (scene: scene) (l: light) (p: point) (n: unit_vector) (m: material) : colour = 
+    let light_pos = light_location l
+    let light_beam = light_pos - p
+    if dot n light_beam < 0.0
+        then black
+        else
+            // move the starting point a miniscule amount in the direction of the surface 
+            // normal to avoid this point shadowing itself.
+            let src = p + (1e-12 * n) 
+            let light_ray = {src = src; direction = normalize light_beam}
+            if in_shadow scene light_ray 
+                then black
+                else 
+                    let lambert = dot light_ray.direction n
+                    let diffuse = m.diffuse * m.colour * light_colour l * lambert
+                    let specular = blinn_phong_highlight view_ray light_ray n (light_colour l) m
+                    diffuse + specular
              
-let light_point (s: scene) (p: point) (n: unit_vector) = 
-    let rec light_val lights luma p n = 
-        match lights with 
-        | [] -> luma
-        | l :: tail -> 
-            let luma' = luma + lighting_contribution s l p n
-            light_val tail luma' p n
-    light_val s.lights black p n
+let light_point (view_ray: ray) (s: scene) (pt: point) (norm: unit_vector) (mat: material) = 
+    let compute_lighting (c: colour) (l: light) = 
+        c + lighting_contribution view_ray s l pt norm mat
+    List.fold compute_lighting (mat.colour * mat.ambient) s.lights
 
 
 let trace (s: scene) (r: ray) = 
@@ -100,8 +107,7 @@ let trace (s: scene) (r: ray) =
     | Some (o, t) ->
         let pt = r.src + (t * r.direction)
         let n = surface_normal pt o
-        let c = o.material.colour * o.material.ambient +
-                o.material.colour * light_point s pt n
+        let c = light_point r s pt n o.material
         clamp c |> pixel.fromColour
 
 let render width height s (f: int -> int -> pixel -> unit) = 

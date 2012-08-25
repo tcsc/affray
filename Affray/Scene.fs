@@ -7,13 +7,29 @@ open PointLight
 
 type primitive = Sphere of sphere
 
-type material = 
-    {colour: colour; opacity: float; ambient: float}
+type highlight = { intensity: float; size: float; }
+
+type material = {
+        colour: colour; 
+        opacity: float; 
+        ambient: float;
+        diffuse: float;
+        highlight: highlight;
+    }
 
 type obj = 
     {primitive: primitive; material: material}
 
 type light = PointSource of point_light
+
+let light_colour (l:light) = 
+    match l with
+    | PointSource p -> p.colour
+
+
+let light_location (l: light) = 
+    match l with 
+    | PointSource p -> p.location
 
 type camera = {
         location: point; 
