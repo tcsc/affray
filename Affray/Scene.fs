@@ -10,6 +10,7 @@ type primitive = Sphere of sphere
 type highlight = { intensity: float; size: float; }
 
 type material = {
+        reflection: float;
         colour: colour; 
         opacity: float; 
         ambient: float;

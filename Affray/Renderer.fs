@@ -101,18 +101,32 @@ let light_point (view_ray: ray) (s: scene) (pt: point) (norm: unit_vector) (mat:
     List.fold compute_lighting (mat.colour * mat.ambient) s.lights
 
 
-let trace (s: scene) (r: ray) = 
-    match find_closest_intersecting_object s r with
-    | None -> {r = 1.0; g = 1.0; b = 1.0; a = 1.0 } 
-    | Some (o, t) ->
-        let pt = r.src + (t * r.direction)
-        let n = surface_normal pt o
-        let c = light_point r s pt n o.material
-        clamp c |> pixel.fromColour
+let trace_pixel (s: scene) (r: ray) = 
+    let rec trace (s: scene) (r: ray) (acc: colour) (weight: float) =
+        match find_closest_intersecting_object s r with
+        | None -> acc
+        | Some (o, t) ->
+            let pt = r.src + (t * r.direction)
+            let n = surface_normal pt o
+            let c = light_point r s pt n o.material
+            let acc' = acc + (weight * c)
+            match o.material.reflection with
+            | ref when ref > 0.0 ->
+                // reflect the vector through the surface normal:
+                //   http://www.3dkingdoms.com/weekly/weekly.php?a=2
+                let src = pt + (1e-12 * n) 
+                let dir = (-2.0 * (r.direction |> dot <| n) * n) + r.direction
+                let reflected_ray = {src = src; direction = normalize dir}
+                trace s reflected_ray acc' (weight * ref)
+
+            | _ -> acc'
+    trace s r black 1.0
 
 let render width height s (f: int -> int -> pixel -> unit) = 
     for ray_context in planar_projection width height s.camera do
-        trace s ray_context.r 
+        trace_pixel s ray_context.r 
+        |> clamp
+        |> pixel.fromColour
         |> f ray_context.x ray_context.y
 
 let render_to_bitmap (bmp: Bitmap) (s: scene) = 

@@ -11,6 +11,7 @@ open Renderer
 
 let scene =
     let default_material = {
+            reflection = 0.5;
             colour = white; 
             opacity = 1.0;
             ambient = 0.15; 
@@ -18,16 +19,20 @@ let scene =
             highlight = {intensity = 1.0; size = 60.0}
         }
     let o = { 
-        primitive = Sphere {centre = {x = 0.0; y = 0.0; z = -5.0}; radius = 1.0};
+        primitive = Sphere {centre = {x = 2.0; y = 0.0; z = 2.0}; radius = 0.5};
         material = {default_material with colour = red}
     }
     let o2 = { 
-        primitive = Sphere {centre = {x = -1.5; y = 0.0; z = -6.0}; radius = 1.0};
+        primitive = Sphere {centre = {x = 2.0; y = -2.5; z = 1.0}; radius = 1.0};
         material = {default_material with colour = green}
     }
     let o3 = { 
-        primitive = Sphere {centre = {x = 1.5; y = 0.0; z = -4.0}; radius = 1.0};
+        primitive = Sphere {centre = {x = -2.0; y = 0.0; z = 4.0}; radius = 1.0};
         material = {default_material with colour = blue}
+    }
+    let o4 = { 
+        primitive = Sphere {centre = {x = 0.0; y = 0.0; z = 0.0}; radius = 2.0};
+        material = {default_material with reflection = 0.99}
     }
     let l1 = PointSource {
         location = {x = 100.0; y = 300.0; z = 100.0}; 
@@ -37,12 +42,12 @@ let scene =
         location = {x = -10.0; y = -0.5; z = 10.0}
         colour = 0.25 * white
     }
-    {default_scene with objects = [o; o2; o3]; lights = [l1; l2]}
+    {default_scene with objects = [o; o2; o3; o4]; lights = [l1]}
       
 do
-    let output = new Bitmap(640, 480, PixelFormat.Format32bppPArgb)
+    let output = new Bitmap(1024, 768, PixelFormat.Format32bppPArgb)
     let cam' = set_aspect_ratio 1.333 default_camera.horizontal_fov default_camera
-    let cam'' = {cam' with location = {x = 0.0; y = 0.0; z = 1.1}}
+    let cam'' = {cam' with location = {x = 0.0; y = 0.0; z = 10.0}}
 
     let timer = new Stopwatch()
     timer.Start()
