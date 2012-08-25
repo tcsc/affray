@@ -24,7 +24,7 @@ let scene =
     }
     let o2 = { 
         primitive = Sphere {centre = {x = 2.0; y = -2.5; z = 1.0}; radius = 1.0};
-        material = {default_material with colour = green}
+        material = {default_material with colour = green; reflection = 0.25}
     }
     let o3 = { 
         primitive = Sphere {centre = {x = -2.0; y = 0.0; z = 4.0}; radius = 1.0};

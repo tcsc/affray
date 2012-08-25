@@ -3,7 +3,9 @@ module Renderer
 open System
 open System.Drawing
 open System.Drawing.Imaging
+
 open Microsoft.FSharp.NativeInterop
+open Microsoft.FSharp.Collections
 
 open Affray.Colour
 open Affray.Geometry
@@ -123,11 +125,11 @@ let trace_pixel (s: scene) (r: ray) =
     trace s r black 1.0
 
 let render width height s (f: int -> int -> pixel -> unit) = 
-    for ray_context in planar_projection width height s.camera do
-        trace_pixel s ray_context.r 
-        |> clamp
-        |> pixel.fromColour
-        |> f ray_context.x ray_context.y
+    planar_projection width height s.camera
+    |> PSeq.fold (fun _ ctx -> trace_pixel s ctx.r
+                               |> clamp
+                               |> pixel.fromColour
+                               |> ignore) ()
 
 let render_to_bitmap (bmp: Bitmap) (s: scene) = 
     let with_bits_do (f : BitmapData -> unit) = 
