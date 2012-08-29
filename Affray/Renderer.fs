@@ -126,10 +126,10 @@ let trace_pixel (s: scene) (r: ray) =
 
 let render width height s (f: int -> int -> pixel -> unit) = 
     planar_projection width height s.camera
-    |> PSeq.fold (fun _ ctx -> trace_pixel s ctx.r
+    |> Seq.fold (fun _ ctx -> trace_pixel s ctx.r //PSeq
                                |> clamp
                                |> pixel.fromColour
-                               |> ignore) ()
+                               |> f ctx.x ctx.y) ()
 
 let render_to_bitmap (bmp: Bitmap) (s: scene) = 
     let with_bits_do (f : BitmapData -> unit) = 

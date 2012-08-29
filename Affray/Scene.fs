@@ -6,6 +6,7 @@ open Affray.Math
 open PointLight
 
 type primitive = Sphere of sphere
+               | Plane of plane
 
 type highlight = { intensity: float; size: float; }
 
@@ -52,7 +53,13 @@ let default_camera = {
 
 let set_aspect_ratio (aspect: float) (fov_x: float<radians>) (c: camera) =
     let fov_y = (1.0/aspect) * fov_x
-    {c with horizontal_fov = fov_x; vertical_fov = fov_y} 
+    {c with horizontal_fov = fov_x; vertical_fov = fov_y}
+
+let look_at (target: point) (c: camera) = 
+    let direction' = normalize (target - c.location)
+    let right = normalize (cross direction' c.up)
+    let up' = normalize (cross right direction')
+    {c with up = up'; direction = direction'}
 
 /// Describes a scene. Probably only temporary, as I don't think it will scale 
 /// to complex scenes.
@@ -75,10 +82,12 @@ let add_light s l =
 let intersects (r: ray) (o: obj) = 
     match o.primitive with
     | Sphere s -> ray_sphere_intersection r s
+    | Plane p -> ray_plane_intersection r p
     
 let surface_normal (p: point) (o: obj) = 
     match o.primitive with
     | Sphere s -> sphere_normal_at p s
+    | Plane p -> p.normal
      
 type ray_context = {x: int; y: int; r: ray} 
    

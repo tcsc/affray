@@ -27,6 +27,9 @@ module Geometry =
     type cylender = 
         {a: point; b: point; radius: float} 
 
+    type plane = 
+        {normal: unit_vector; offset: float}
+
     /// <summary>
     /// A ray startinng of at a given position and running off to infinity in a
     /// given direction
@@ -56,4 +59,25 @@ module Geometry =
 
     let sphere_normal_at (p: point) (s: sphere) = 
         p - s.centre |> normalize
-            
+
+    let ray_plane_intersection (r : ray) (p : plane) = 
+        let n = (p.offset - dot r.src p.normal)
+        let d = (dot r.direction p.normal)
+        match n / d with
+        | a when a > 0.0 -> Some a
+        | _ -> None
+
+(*
+float PlanarSurface::nearestIntersection(const vector3& camera,
+                                         const vector3& heading) const {
+  if(intersectsBoundingPlane(camera, heading)) {
+    float alpha = (parameter_ - camera.dot(normal_)) / heading.dot(normal_);
+    if (alpha > 0.001)
+      return alpha;
+    else
+      return MAX_DISTANCE;
+  } else {
+    return MAX_DISTANCE;
+  }
+}
+*)

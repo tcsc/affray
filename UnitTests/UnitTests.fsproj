@@ -41,6 +41,10 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\UnitTests.XML</DocumentationFile>
     <PlatformTarget>x86</PlatformTarget>
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Users\Trent Clarke\Documents\Visual Studio 2010\Projects\affray\packages\NUnit.Runners.2.6.1\tools\nunit-console-x86.exe</StartProgram>
+    <StartArguments>UnitTests.dll</StartArguments>
+    <StartWorkingDirectory>C:\Users\Trent Clarke\Documents\Visual Studio 2010\Projects\affray\UnitTests\bin\Debug\</StartWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
@@ -62,6 +66,10 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Debug\UnitTests.XML</DocumentationFile>
     <PlatformTarget>x64</PlatformTarget>
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Users\Trent Clarke\Documents\Visual Studio 2010\Projects\affray\packages\NUnit.Runners.2.6.1\tools\nunit-console.exe</StartProgram>
+    <StartWorkingDirectory>C:\Users\Trent Clarke\Documents\Visual Studio 2010\Projects\affray\UnitTests\bin\Debug\</StartWorkingDirectory>
+    <StartArguments>UnitTests.dll</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
     <DebugType>pdbonly</DebugType>
@@ -72,6 +80,10 @@
     <WarningLevel>3</WarningLevel>
     <DocumentationFile>bin\Release\UnitTests.XML</DocumentationFile>
     <PlatformTarget>x64</PlatformTarget>
+    <StartAction>Program</StartAction>
+    <StartProgram>
+    </StartProgram>
+    <StartWorkingDirectory>C:\Users\Trent Clarke\Documents\Visual Studio 2010\Projects\affray\UnitTests\bin\Debug\</StartWorkingDirectory>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
