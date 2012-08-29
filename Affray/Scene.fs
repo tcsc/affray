@@ -3,21 +3,11 @@ module Scene
 open Affray.Colour
 open Affray.Geometry
 open Affray.Math
+open Affray.Material
 open PointLight
 
 type primitive = Sphere of sphere
                | Plane of plane
-
-type highlight = { intensity: float; size: float; }
-
-type material = {
-        reflection: float;
-        colour: colour; 
-        opacity: float; 
-        ambient: float;
-        diffuse: float;
-        highlight: highlight;
-    }
 
 type obj = 
     {primitive: primitive; material: material}
@@ -27,7 +17,6 @@ type light = PointSource of point_light
 let light_colour (l:light) = 
     match l with
     | PointSource p -> p.colour
-
 
 let light_location (l: light) = 
     match l with 

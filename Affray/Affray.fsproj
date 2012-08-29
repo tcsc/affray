@@ -62,6 +62,7 @@
     <Compile Include="Geometry.fs" />
     <Compile Include="Colour.fs" />
     <Compile Include="PointLight.fs" />
+    <Compile Include="Material.fs" />
     <Compile Include="Scene.fs" />
     <Compile Include="Renderer.fs" />
     <Compile Include="Program.fs" />

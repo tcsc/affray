@@ -9,6 +9,7 @@ open Microsoft.FSharp.Collections
 
 open Affray.Colour
 open Affray.Geometry
+open Affray.Material
 open Affray.Math
 open Scene
 
@@ -66,8 +67,12 @@ let convert p : int32 =
     let b = int(255.0 * p.b)
     ((a &&& 0xFF) <<< 24) ||| ((r &&& 0xFF) <<< 16) ||| ((g &&& 0xFF) <<< 8) ||| (b &&& 0xFF)
 
-let blinn_phong_highlight (view_ray: ray) (light_ray: ray) (norm: unit_vector) (intensity: colour) (mat: material) : colour = 
-    match mat.highlight.intensity with 
+let blinn_phong_highlight (view_ray: ray)
+                          (light_ray: ray)
+                          (norm: unit_vector)
+                          (intensity: colour)
+                          (finish: finish) : colour =
+    match finish.highlight.intensity with 
     | spec when spec > 0.0 ->
         let half_vector = light_ray.direction - view_ray.direction
         match sqrt (half_vector |> dot <| half_vector) with
@@ -75,11 +80,17 @@ let blinn_phong_highlight (view_ray: ray) (light_ray: ray) (norm: unit_vector) (
         | x -> 
             let blinn_vector = half_vector * (1.0/x)
             let blinn_base = max (blinn_vector |> dot <| norm) 0.0
-            let blinn_term = spec * (blinn_base ** mat.highlight.size)
+            let blinn_term = spec * (blinn_base ** finish.highlight.size)
             blinn_term * intensity
     | _ -> black
 
-let lighting_contribution (view_ray: ray) (scene: scene) (l: light) (p: point) (n: unit_vector) (m: material) : colour = 
+let lighting_contribution (view_ray: ray)
+                          (scene: scene)
+                          (l: light)
+                          (p: point)
+                          (n: unit_vector)
+                          (colour: colour)
+                          (finish: finish) : colour = 
     let light_pos = light_location l
     let light_beam = light_pos - p
     if dot n light_beam < 0.0
@@ -93,14 +104,21 @@ let lighting_contribution (view_ray: ray) (scene: scene) (l: light) (p: point) (
                 then black
                 else 
                     let lambert = dot light_ray.direction n
-                    let diffuse = m.diffuse * m.colour * light_colour l * lambert
-                    let specular = blinn_phong_highlight view_ray light_ray n (light_colour l) m
+                    let diffuse = finish.diffuse * colour * light_colour l * lambert
+                    let specular = blinn_phong_highlight view_ray light_ray n (light_colour l) finish
                     diffuse + specular
              
-let light_point (view_ray: ray) (s: scene) (pt: point) (norm: unit_vector) (mat: material) = 
+let light_point (view_ray: ray)
+                (s: scene)
+                (pt: point)
+                (norm: unit_vector)
+                (colour: colour)
+                (finish: finish) = 
+
     let compute_lighting (c: colour) (l: light) = 
-        c + lighting_contribution view_ray s l pt norm mat
-    List.fold compute_lighting (mat.colour * mat.ambient) s.lights
+        c + lighting_contribution view_ray s l pt norm colour finish
+
+    in  List.fold compute_lighting (colour * finish.ambient) s.lights
 
 
 let trace_pixel (s: scene) (r: ray) = 
@@ -109,10 +127,11 @@ let trace_pixel (s: scene) (r: ray) =
         | None -> acc
         | Some (o, t) ->
             let pt = r.src + (t * r.direction)
+            let colour, finish = texture_point pt o.material
             let n = surface_normal pt o
-            let c = light_point r s pt n o.material
+            let c = light_point r s pt n colour finish
             let acc' = acc + (weight * c)
-            match o.material.reflection with
+            match finish.reflection with
             | ref when ref > 0.0 ->
                 // reflect the vector through the surface normal:
                 //   http://www.3dkingdoms.com/weekly/weekly.php?a=2

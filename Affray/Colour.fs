@@ -33,3 +33,5 @@ module Colour =
     let green = {r = 0.0; g = 1.0; b = 0.0}
 
     let blue = {r = 0.0; g = 0.0; b = 1.0}
+
+    let yellow = {r = 1.0; g = 1.0; b = 0.0}

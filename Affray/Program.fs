@@ -8,13 +8,13 @@ open System.Diagnostics
 open CommandLine
 
 open Affray.Colour
+open Affray.Material
 open Scene
 open Renderer
 
 let scene =
-    let default_material = {
+    let default_finish = {
             reflection = 0.5;
-            colour = white; 
             opacity = 1.0;
             ambient = 0.15; 
             diffuse = 1.0;
@@ -22,27 +22,31 @@ let scene =
         }
     let o = { 
         primitive = Sphere {centre = {x = 2.0; y = 1.0; z = 2.0}; radius = 0.5};
-        material = {default_material with colour = red}
+        material = Checkerboard (
+                        Solid (red, {default_finish with reflection = 0.0}),
+                        Solid (white, {default_finish with reflection = 1.0}))    
     }
     let o2 = { 
         primitive = Sphere {centre = {x = 3.0; y = 0.0; z = 1.0}; radius = 1.0};
-        material = {default_material with colour = green; reflection = 0.25}
+        material = Solid (green, {default_finish with reflection = 0.25})
     }
     let o3 = { 
         primitive = Sphere {centre = {x = -2.0; y = 0.0; z = 4.0}; radius = 1.0};
-        material = {default_material with colour = blue}
+        material = Solid (blue, default_finish)
     }
     let o4 = { 
         primitive = Sphere {centre = {x = 0.0; y = 0.0; z = 0.0}; radius = 2.0};
-        material = {default_material with reflection = 0.99}
-    }
-    let o5 = {
-        primitive = Plane {normal = {x = 0.0; y = 1.0; z = 0.0}; offset = -5.0};
-        material = {default_material with colour = {r = 1.0; g = 1.0; b = 0.0}}
+        material = Solid (white, {default_finish with reflection = 0.99})
     }
     let o6 = { 
         primitive = Sphere {centre = {x = -2.0; y = 2.0; z = -2.0}; radius = 0.5};
-        material = {default_material with colour = red}
+        material = Solid (red, default_finish)
+    }
+    let o5 = {
+        primitive = Plane {normal = {x = 0.0; y = 1.0; z = 0.0}; offset = -5.0};
+        material = Checkerboard (
+                        Solid (black, default_finish),
+                        Solid (white, default_finish))
     }
 
 
