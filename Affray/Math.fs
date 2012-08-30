@@ -45,8 +45,14 @@ type vector =
     static member ( / ) (a: vector, b: int) = 
         a / float(b)
 
+let positive_x = {x = 1.0; y = 0.0; z = 0.0}
+let positive_y = {x = 0.0; y = 1.0; z = 0.0}
+let positive_z = {x = 0.0; y = 0.0; z = 1.0}
 
-// Defines a 4x4 matrix for manipulating 3d vectors and points
+/// <summary>
+/// Defines a 4x4 matrix for manipulating 3d vectors and points in 
+/// homogeneous co-ordinates 
+/// </summary>
 type matrix (values : float[,]) = 
     static let identity =
         new matrix(Array2D.init 4 4 (fun i j -> if i = j then 1.0 else 0.0))
@@ -63,6 +69,8 @@ type matrix (values : float[,]) =
             for i = 0 to 3 do
                 result.[i, j] <- row_column_dot_product a b i j
         matrix result
+
+//    static member ( * ) (a: matrix, b: vector) = 
        
     override self.Equals (obj: Object) : bool =
         match obj with
@@ -85,6 +93,12 @@ type matrix (values : float[,]) =
     member self.Item with get(i,j) = values.[i, j]
         
     static member Identity with get() = identity
+
+/// <summary>
+/// Computes and returns the transpose of the supplied matrix
+/// </summary>
+let transpose (m: matrix) = 
+    new matrix (Array2D.init 4 4 (fun i j -> m.[j, i]))
 
 /// <summary>
 /// A unit vector alias for a vector. More for implicit documentation than

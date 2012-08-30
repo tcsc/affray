@@ -30,6 +30,9 @@ module Geometry =
     type plane = 
         {normal: unit_vector; offset: float}
 
+    type bounded_plane = 
+        {plane: plane; min: point; max: point}
+
     /// <summary>
     /// A ray startinng of at a given position and running off to infinity in a
     /// given direction
@@ -66,6 +69,22 @@ module Geometry =
         match n / d with
         | a when a > 0.0 -> Some a
         | _ -> None
+
+    let ray_bounded_plane_intersection (r: ray) (p: bounded_plane) = 
+        match ray_plane_intersection r p.plane with
+        | Some t -> 
+            let pt = r.src + (t * r.direction)
+            let xi = pt |> dot <| positive_x
+            let yi = pt |> dot <| positive_y
+            let zi = pt |> dot <| positive_z
+
+            let intersects = p.min.x < xi && xi < p.max.x && 
+                             p.min.y < yi && yi < p.max.y &&
+                             p.min.z < zi && zi < p.max.z
+            if intersects 
+                then Some t 
+                else None
+        | None -> None
 
 (*
 float PlanarSurface::nearestIntersection(const vector3& camera,

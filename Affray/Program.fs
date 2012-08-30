@@ -20,34 +20,37 @@ let scene =
             diffuse = 1.0;
             highlight = {intensity = 1.0; size = 60.0}
         }
-    let o = { 
-        primitive = Sphere {centre = {x = 2.0; y = 1.0; z = 2.0}; radius = 0.5};
-        material = Checkerboard (
-                        Solid (red, {default_finish with reflection = 0.0}),
-                        Solid (white, {default_finish with reflection = 1.0}))    
-    }
-    let o2 = { 
-        primitive = Sphere {centre = {x = 3.0; y = 0.0; z = 1.0}; radius = 1.0};
-        material = Solid (green, {default_finish with reflection = 0.25})
-    }
-    let o3 = { 
-        primitive = Sphere {centre = {x = -2.0; y = 0.0; z = 4.0}; radius = 1.0};
-        material = Solid (blue, default_finish)
-    }
-    let o4 = { 
-        primitive = Sphere {centre = {x = 0.0; y = 0.0; z = 0.0}; radius = 2.0};
-        material = Solid (white, {default_finish with reflection = 0.99})
-    }
-    let o6 = { 
-        primitive = Sphere {centre = {x = -2.0; y = 2.0; z = -2.0}; radius = 0.5};
-        material = Solid (red, default_finish)
-    }
-    let o5 = {
-        primitive = Plane {normal = {x = 0.0; y = 1.0; z = 0.0}; offset = -5.0};
-        material = Checkerboard (
-                        Solid (black, default_finish),
-                        Solid (white, default_finish))
-    }
+    let objects = [
+        { 
+            primitive = Sphere {centre = {x = 2.0; y = 1.0; z = 2.0}; radius = 0.5};
+            material = Solid (green, {default_finish with reflection = 0.99})
+        }; { 
+            primitive = Sphere {centre = {x = 3.0; y = 0.0; z = 1.0}; radius = 1.0};
+            material = Solid (green, {default_finish with reflection = 0.25})
+        }; { 
+            primitive = Sphere {centre = {x = -2.0; y = 0.0; z = 4.0}; radius = 1.0};
+            material = Solid (blue, default_finish)
+        }; { 
+            primitive = Sphere {centre = {x = 0.0; y = 0.0; z = 0.0}; radius = 2.0};
+            material = Checkerboard (
+                            Solid (red, {default_finish with reflection = 0.0}),
+                            Solid (white, {default_finish with reflection = 1.0}))
+       }; { 
+            primitive = Sphere {centre = {x = -2.0; y = 2.0; z = -2.0}; radius = 0.5};
+            material = Solid (red, default_finish)
+       }; {
+            primitive = BoundedPlane {
+                            plane = {normal = {x = 0.0; y = 1.0; z = 0.0}; offset = -2.0};
+                            min = {x = -5.0; y = -2.1; z = -5.0; }
+                            max = {x = 5.0; y = -1.9; z = 5.0; }
+                        }
+            material = Checkerboard (
+                            Solid (black, default_finish),
+                            Solid ({r = 0.8; g = 0.8; b = 0.8}, default_finish))
+       }; { 
+            primitive = Sphere {centre = {x = 4.0; y = 0.0; z = -5.0}; radius = 1.0};
+            material = Solid (blue, default_finish)
+       };]
 
 
     let l1 = PointSource {
@@ -58,7 +61,7 @@ let scene =
         location = {x = -10.0; y = -0.5; z = 10.0}
         colour = 0.25 * white
     }
-    {default_scene with objects = [o; o2; o3; o4; o5; o6]; lights = [l1]}
+    {default_scene with objects = objects; lights = [l1]}
 
 type options () = 
     let mutable scene_file = System.String.Empty
@@ -83,7 +86,7 @@ type options () =
       
 do
     let output = new Bitmap(1024, 768, PixelFormat.Format32bppPArgb)
-    let cam = {default_camera with location = {x = 0.0; y = 10.0; z = 10.0}}
+    let cam = {default_camera with location = {x = 0.0; y = 5.0; z = 10.0}}
               |> set_aspect_ratio 1.333 default_camera.horizontal_fov
               |> look_at {x = 0.0; y = 0.0; z = 0.0}
 
@@ -92,6 +95,6 @@ do
     render_to_bitmap output {scene with camera = cam}
     timer.Stop()
 
-    output.Save("pic.jpg", ImageFormat.Jpeg)
+    output.Save("pic.png", ImageFormat.Png)
 
     printfn "Render took %d ms" timer.ElapsedMilliseconds

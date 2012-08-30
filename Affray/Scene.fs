@@ -8,6 +8,7 @@ open PointLight
 
 type primitive = Sphere of sphere
                | Plane of plane
+               | BoundedPlane of bounded_plane
 
 type obj = 
     {primitive: primitive; material: material}
@@ -44,6 +45,9 @@ let set_aspect_ratio (aspect: float) (fov_x: float<radians>) (c: camera) =
     let fov_y = (1.0/aspect) * fov_x
     {c with horizontal_fov = fov_x; vertical_fov = fov_y}
 
+/// <summary>
+/// Pans and rotates the supplied camera to look at a given point.
+/// </summary>
 let look_at (target: point) (c: camera) = 
     let direction' = normalize (target - c.location)
     let right = normalize (cross direction' c.up)
@@ -66,17 +70,18 @@ let add_object s o =
     
 let add_light s l = 
     {s with lights = l :: s.lights}
-   
     
 let intersects (r: ray) (o: obj) = 
     match o.primitive with
     | Sphere s -> ray_sphere_intersection r s
     | Plane p -> ray_plane_intersection r p
+    | BoundedPlane p -> ray_bounded_plane_intersection r p
     
 let surface_normal (p: point) (o: obj) = 
     match o.primitive with
     | Sphere s -> sphere_normal_at p s
     | Plane p -> p.normal
+    | BoundedPlane p -> p.plane.normal
      
 type ray_context = {x: int; y: int; r: ray} 
    
