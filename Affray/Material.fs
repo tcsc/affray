@@ -48,10 +48,8 @@ module Material =
         let u = (dot dir pt)
         let v = (abs(u % 1.0))
         let ((v0, c0), (v1, c1)) = find_colour_range colours v colours.Head
-
         let delta = c1 - c0
         let v' = (v - v0) / (v1 - v0)
-
         c0 + (v' * delta)
 
 
