@@ -37,7 +37,13 @@ module Geometry =
     /// A ray startinng of at a given position and running off to infinity in a
     /// given direction
     /// </summary>
-    type ray = {src: point; direction: unit_vector}
+    type ray =
+        {src: point; direction: unit_vector}
+
+        override self.ToString () = 
+            sprintf "src: (%.12f, %.12f, %.12f); dir: (%.12f, %.12f, %.12f)" 
+                self.src.x self.src.y self.src.z 
+                self.direction.x self.direction.y self.direction.z
 
     /// <summary>
     /// Attempts to find the point on a ray where it intersects with the given
@@ -85,18 +91,3 @@ module Geometry =
                 then Some t 
                 else None
         | None -> None
-
-(*
-float PlanarSurface::nearestIntersection(const vector3& camera,
-                                         const vector3& heading) const {
-  if(intersectsBoundingPlane(camera, heading)) {
-    float alpha = (parameter_ - camera.dot(normal_)) / heading.dot(normal_);
-    if (alpha > 0.001)
-      return alpha;
-    else
-      return MAX_DISTANCE;
-  } else {
-    return MAX_DISTANCE;
-  }
-}
-*)

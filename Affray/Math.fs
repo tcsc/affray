@@ -45,6 +45,9 @@ type vector =
     static member ( / ) (a: vector, b: int) = 
         a / float(b)
 
+    static member ( ~- ) (v: vector) = 
+        {x = -v.x; y = -v.y; z = -v.z}
+
 let positive_x = {x = 1.0; y = 0.0; z = 0.0}
 let positive_y = {x = 0.0; y = 1.0; z = 0.0}
 let positive_z = {x = 0.0; y = 0.0; z = 1.0}
@@ -69,8 +72,6 @@ type matrix (values : float[,]) =
             for i = 0 to 3 do
                 result.[i, j] <- row_column_dot_product a b i j
         matrix result
-
-//    static member ( * ) (a: matrix, b: vector) = 
        
     override self.Equals (obj: Object) : bool =
         match obj with

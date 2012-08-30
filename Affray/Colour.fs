@@ -18,6 +18,9 @@ module Colour =
         static member ( + ) (lhs: colour, rhs: colour) = 
             {r = lhs.r + rhs.r; g = lhs.g + rhs.g; b = lhs.b + rhs.b}
 
+        static member ( - ) (lhs: colour, rhs: colour) = 
+            {r = lhs.r - rhs.r; g = lhs.g - rhs.g; b = lhs.b - rhs.b}
+
     let clamp (c: colour) = 
         let r' = min 1.0 c.r |> max 0.0
         let g' = min 1.0 c.g |> max 0.0

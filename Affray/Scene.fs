@@ -56,10 +56,16 @@ let look_at (target: point) (c: camera) =
 
 /// Describes a scene. Probably only temporary, as I don't think it will scale 
 /// to complex scenes.
-type scene = {camera: camera; objects: obj list; lights: light list}
+type scene = {
+        camera: camera; 
+        objects: obj list; 
+        lights: light list;
+        sky: pigment
+     }
 
 /// The default scene. No objects, no lights and the default camera.
 let default_scene = { 
+        sky = Colour black;
         camera = default_camera;
         objects = [];
         lights = [] 

@@ -42,9 +42,11 @@
     <DocumentationFile>bin\Debug\UnitTests.XML</DocumentationFile>
     <PlatformTarget>x86</PlatformTarget>
     <StartAction>Program</StartAction>
-    <StartProgram>C:\Users\Trent Clarke\Documents\Visual Studio 2010\Projects\affray\packages\NUnit.Runners.2.6.1\tools\nunit-console-x86.exe</StartProgram>
-    <StartArguments>UnitTests.dll</StartArguments>
+    <StartProgram>C:\Users\Trent Clarke\Documents\Visual Studio 2010\Projects\affray\packages\NUnit.Runners.2.6.1\tools\nunit-x86.exe</StartProgram>
+    <StartArguments>
+    </StartArguments>
     <StartWorkingDirectory>C:\Users\Trent Clarke\Documents\Visual Studio 2010\Projects\affray\UnitTests\bin\Debug\</StartWorkingDirectory>
+    <EnableUnmanagedDebugging>true</EnableUnmanagedDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
@@ -91,6 +93,7 @@
     <Compile Include="GeometryTests.fs" />
     <Compile Include="MathTests.fs" />
     <None Include="packages.config" />
+    <Compile Include="RenderingTests.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />

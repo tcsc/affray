@@ -9,8 +9,10 @@ open CommandLine
 
 open Affray.Colour
 open Affray.Material
+open Affray.Math
+open Affray.Renderer
+
 open Scene
-open Renderer
 
 let scene =
     let default_finish = {
@@ -20,36 +22,40 @@ let scene =
             diffuse = 1.0;
             highlight = {intensity = 1.0; size = 60.0}
         }
+
+    let checkerboard_material = 
+        Checkerboard (
+            Solid (Colour black, default_finish),
+            Solid (Colour {r = 0.8; g = 0.8; b = 0.8}, default_finish))
+
     let objects = [
         { 
-            primitive = Sphere {centre = {x = 2.0; y = 1.0; z = 2.0}; radius = 0.5};
-            material = Solid (green, {default_finish with reflection = 0.99})
+            primitive = Sphere {centre = {x = 2.0; y = 2.0; z = 2.0}; radius = 0.5};
+            material = Solid (Colour green, {default_finish with reflection = 0.99})
         }; { 
-            primitive = Sphere {centre = {x = 3.0; y = 0.0; z = 1.0}; radius = 1.0};
-            material = Solid (green, {default_finish with reflection = 0.25})
+            primitive = Sphere {centre = {x = 3.0; y = 1.0; z = 1.0}; radius = 1.0};
+            material = Solid (Colour green, {default_finish with reflection = 0.25})
         }; { 
-            primitive = Sphere {centre = {x = -2.0; y = 0.0; z = 4.0}; radius = 1.0};
-            material = Solid (blue, default_finish)
+            primitive = Sphere {centre = {x = -2.0; y = 1.0; z = 4.0}; radius = 1.0};
+            material = Solid (Colour blue, default_finish)
         }; { 
-            primitive = Sphere {centre = {x = 0.0; y = 0.0; z = 0.0}; radius = 2.0};
+            primitive = Sphere {centre = {x = 0.0; y = 2.0; z = 0.0}; radius = 2.0};
             material = Checkerboard (
-                            Solid (red, {default_finish with reflection = 0.0}),
-                            Solid (white, {default_finish with reflection = 1.0}))
+                            Solid (Colour red, {default_finish with reflection = 0.0}),
+                            Solid (Colour white, {default_finish with reflection = 0.75}))
        }; { 
-            primitive = Sphere {centre = {x = -2.0; y = 2.0; z = -2.0}; radius = 0.5};
-            material = Solid (red, default_finish)
+            primitive = Sphere {centre = {x = -2.5; y = 1.0; z = -2.0}; radius = 0.5};
+            material = Solid (Colour red, default_finish)
        }; {
             primitive = BoundedPlane {
-                            plane = {normal = {x = 0.0; y = 1.0; z = 0.0}; offset = -2.0};
-                            min = {x = -5.0; y = -2.1; z = -5.0; }
-                            max = {x = 5.0; y = -1.9; z = 5.0; }
+                            plane = {normal = {x = 0.0; y = 1.0; z = 0.0}; offset = -0.01};
+                            min = {x = -5.0; y = -0.1; z = -5.0; }
+                            max = {x = 5.0; y = 0.1; z = 5.0; }
                         }
-            material = Checkerboard (
-                            Solid (black, default_finish),
-                            Solid ({r = 0.8; g = 0.8; b = 0.8}, default_finish))
+            material = checkerboard_material
        }; { 
-            primitive = Sphere {centre = {x = 4.0; y = 0.0; z = -5.0}; radius = 1.0};
-            material = Solid (blue, default_finish)
+            primitive = Sphere {centre = {x = 4.0; y = 3.0; z = -5.0}; radius = 1.0};
+            material = Solid (Colour blue, default_finish)
        };]
 
 
@@ -61,7 +67,14 @@ let scene =
         location = {x = -10.0; y = -0.5; z = 10.0}
         colour = 0.25 * white
     }
-    {default_scene with objects = objects; lights = [l1]}
+
+    {default_scene with 
+        objects = objects; 
+        lights = [l1] 
+        sky = Gradient (positive_y, [
+                    (0.0,   {r=0.1; g=0.1; b=0.4});
+                    (1.0,   {r=0.0; g=0.0; b=0.0})
+                  ])}
 
 type options () = 
     let mutable scene_file = System.String.Empty
@@ -86,9 +99,9 @@ type options () =
       
 do
     let output = new Bitmap(1024, 768, PixelFormat.Format32bppPArgb)
-    let cam = {default_camera with location = {x = 0.0; y = 5.0; z = 10.0}}
+    let cam = {default_camera with location = {x = 0.0; y = 10.0; z = 15.0}; up = positive_y}
               |> set_aspect_ratio 1.333 default_camera.horizontal_fov
-              |> look_at {x = 0.0; y = 0.0; z = 0.0}
+              |> look_at {x = 0.0; y = 2.0; z = 0.0}
 
     let timer = new Stopwatch()
     timer.Start()
