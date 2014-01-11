@@ -19,11 +19,22 @@ let to_degrees (a: float<rad>) : float<deg> = a * degrees_per_radian
 
 let sqr (x: float) : float = x * x
 
+/// <summary>
+/// Checks to see if two floats are close enough to be considered equal in real life, even
+/// if they're not actually identical. 
+/// </summary>
+let closeEnough (a: float) (b: float) =  
+    if a = b then true
+    elif (a * b) = 0.0 then (a - b) < (Double.Epsilon * Double.Epsilon)
+    else ((a - b) / (abs a + abs b)) < Double.Epsilon
+
+/// <summary>
 /// Defines a simple 3d vector type and some basic operations.
-[<DebuggerDisplay("x = {x}, y = {y}, z = {z}")>]
+/// </summary>
+[<DebuggerDisplay("x = {x}, y = {y}, z = {z}"); CustomEquality; NoComparison>]
 type vector =
     { x: float; y: float; z: float }
-    
+
     static member ( - ) (a: vector, b: vector) : vector = 
         {x = a.x - b.x; y = a.y - b.y; z = a.z - b.z}
 
@@ -47,6 +58,36 @@ type vector =
 
     static member ( ~- ) (v: vector) = 
         {x = -v.x; y = -v.y; z = -v.z}
+
+    /// <summary>
+    /// Implements the standard CLR equality operator. Compares the individual 
+    /// components of the vector for practical equality, rather than binary 
+    /// identity.
+    /// </summary>              
+    static member op_Equality (lhs: vector, rhs: vector) : bool = 
+        (closeEnough lhs.x rhs.x) && 
+        (closeEnough lhs.y rhs.y) && 
+        (closeEnough lhs.z rhs.z)
+
+    /// <summary>
+    /// Overrides the standard Object.Equals method. 
+    /// </summary>
+    /// <remarks>
+    /// If the supplied object is another vector, this methoc tests it for practical 
+    /// equality with the target object. All other types will compare <c>false</c>
+    /// </remarks>              
+       override self.Equals (other: obj) : bool = 
+        match other with 
+        | :? vector as v -> (closeEnough self.x v.x) && 
+                            (closeEnough self.y v.y) && 
+                            (closeEnough self.z v.z)
+        | _ -> false
+
+    override self.ToString () =
+        sprintf "{x: %f, y: %f, z: %f}" self.x self.y self.z
+
+    override self.GetHashCode () = 
+        (int)(self.x + self.y + selhs.z)
 
 let positive_x = {x = 1.0; y = 0.0; z = 0.0}
 let positive_y = {x = 0.0; y = 1.0; z = 0.0}
