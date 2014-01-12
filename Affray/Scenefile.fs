@@ -93,7 +93,7 @@ module Scenefile =
     let colour_point = delimited_block "(" ")" (arglist2 pfloat colour (fun p c -> (p, c)))
 
     let colour_map = 
-        delimited_block "[" "]" (sepEndBy1 colour_point (spaces >>. comma .>> spaces))
+        delimited_block "[" "]" (sepBy1 colour_point (comma .>> spaces))
 
     let gradient_pigment = // gradient { direction: {x, y, z}, colours: [(n, c), (n, c)] }
         named_block "gradient" 
