@@ -19,14 +19,14 @@ type Reflection() = class
             direction = normalize {x = 1.0; y = -1.0; z = 1.0}
         }
 
-        let r' = reflect_ray r {x = 0.0; y = 0.0; z = -1.0} {x = 0.0; y = 0.0; z = 0.0}
+        let rp = reflect_ray r {x = 0.0; y = 0.0; z = -1.0} {x = 0.0; y = 0.0; z = 0.0}
 
         let expected = {
             src = {x = 0.0; y = 0.0; z = 0.0;}
-            direction = normalize {x = 1.0; y = -1.0; z = -1.0}
+            direction = normalize {x = 1.0; y = -1.0; z = 1.0}
         }
 
-        Assert.AreEqual(r', expected)
+        Assert.AreEqual(rp, expected)
 
 end
                  

@@ -11,6 +11,7 @@ open Affray.Colour
 open Affray.Material
 open Affray.Math
 open Affray.Renderer
+//open Affray.Scenefile
 
 open Scene
 
@@ -32,7 +33,8 @@ let scene =
         { 
             primitive = Sphere {centre = {x = 2.0; y = 2.0; z = 2.0}; radius = 0.5};
             material = Solid (Colour green, {default_finish with reflection = 0.99})
-        }; { 
+        };
+        { 
             primitive = Sphere {centre = {x = 3.0; y = 1.0; z = 1.0}; radius = 1.0};
             material = Solid (Colour green, {default_finish with reflection = 0.25})
         }; { 
@@ -121,6 +123,9 @@ let main argv =
             {default_camera with location = {x = 0.0; y = 10.0; z = 15.0}; up = positive_y}
             |> set_aspect_ratio 1.333 default_camera.horizontal_fov
             |> look_at {x = 0.0; y = 2.0; z = 0.0}
+
+        printfn "Loading %s" args.SceneFile
+    //    interpret_scene args.SceneFile |> ignore
 
         let timer = new Stopwatch()
         timer.Start()

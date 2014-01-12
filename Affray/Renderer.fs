@@ -120,8 +120,15 @@ module Renderer =
 
         in List.fold compute_lighting (colour * finish.ambient) s.lights
 
-    // reflect the vector through the surface normal:
-    //   http://www.3dkingdoms.com/weekly/weekly.php?a=2
+    /// <summary> 
+    /// Reflect the vector through the surface normal.
+    /// </summary>
+    /// <param name="ray">The ray to reflect.</param>
+    /// <param name="n">The surface normal at the point of reflection.</param>
+    /// <param name="pt">The point of reflection</param>
+    /// <remarks>
+    /// http://www.3dkingdoms.com/weekly/weekly.php?a=2
+    /// </remarks>
     let reflect_ray (r: ray) (n: unit_vector) (pt: point) = 
         let src = pt + (1e-12 * n) 
         let dir = (-2.0 * (r.direction |> dot <| n) * n) + r.direction

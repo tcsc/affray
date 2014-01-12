@@ -1,6 +1,7 @@
 namespace Affray
 
 open System
+open System.Diagnostics
 open Microsoft.FSharp.Math
 open Affray.Math
 
@@ -29,6 +30,9 @@ module Geometry =
 
     type plane = 
         {normal: unit_vector; offset: float}
+
+        override self.ToString () = 
+            sprintf "plane {normal: %s, offset: %f}" (self.normal.ToString()) self.offset
 
     type bounded_plane = 
         {plane: plane; min: point; max: point}

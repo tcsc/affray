@@ -5,13 +5,25 @@
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{84ee0a8e-2159-4135-b621-96d9d66d7985}</ProjectGuid>
+    <ProjectGuid>{84EE0A8E-2159-4135-B621-96D9D66D7985}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Affray</RootNamespace>
     <AssemblyName>Affray</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
     <Name>Affray</Name>
+    <BuildOrder>
+      <BuildOrder>
+        <String>Math.fs</String>
+        <String>Geometry.fs</String>
+        <String>Colour.fs</String>
+        <String>PointLight.fs</String>
+        <String>Material.fs</String>
+        <String>Scene.fs</String>
+        <String>Renderer.fs</String>
+        <String>Scenefile.fs</String>
+        <String>Program.fs</String>
+      </BuildOrder>
+    </BuildOrder>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
     <DebugSymbols>true</DebugSymbols>
@@ -24,6 +36,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <DocumentationFile>bin\Debug\Affray.XML</DocumentationFile>
     <StartArguments>--width 1280 --height 1024 --scene scene.affray</StartArguments>
+    <Commandlineparameters>-s scenefile.fs</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
@@ -66,41 +79,43 @@
     <Compile Include="Material.fs" />
     <Compile Include="Scene.fs" />
     <Compile Include="Renderer.fs" />
+    <Compile Include="Scenefile.fs" />
     <Compile Include="Program.fs" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="CommandLine">
       <HintPath>..\packages\CommandLineParser.1.9.3.19\lib\CommandLine.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="FSharp.PowerPack.Parallel.Seq, Version=2.0.0.0, Culture=neutral, PublicKeyToken=a19089b1c74d0809" />
-    <Reference Include="IronJS">
-      <HintPath>..\packages\IronJS.Core.0.2.0.1\lib\net40\IronJS.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Dynamic">
-      <HintPath>..\packages\IronJS.Core.0.2.0.1\lib\net40\Microsoft.Dynamic.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Scripting">
-      <HintPath>..\packages\IronJS.Core.0.2.0.1\lib\net40\Microsoft.Scripting.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Scripting.Core">
-      <HintPath>..\packages\IronJS.Core.0.2.0.1\lib\net40\Microsoft.Scripting.Core.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Microsoft.Scripting.ExtensionAttribute">
-      <HintPath>..\packages\IronJS.Core.0.2.0.1\lib\net40\Microsoft.Scripting.ExtensionAttribute.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="FSharp.Core" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
+    <Reference Include="FSharp.PowerPack">
+      <HintPath>..\packages\FSPowerPack.Core.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.PowerPack.Linq">
+      <HintPath>..\packages\FSPowerPack.Linq.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.Linq.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.PowerPack.Metadata">
+      <HintPath>..\packages\FSPowerPack.Metadata.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.Metadata.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.PowerPack.Parallel.Seq">
+      <HintPath>..\packages\FSPowerPack.Parallel.Seq.Community.3.0.0.0\Lib\Net40\FSharp.PowerPack.Parallel.Seq.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.Compiler.Interactive.Settings">
+      <HintPath>..\..\..\..\..\Library\Frameworks\Mono.framework\Versions\Current\lib\mono\4.0\FSharp.Compiler.Interactive.Settings.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.Core">
+      <HintPath>..\..\..\..\..\Library\Frameworks\Mono.framework\Versions\Current\lib\mono\4.0\FSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="FParsec">
+      <HintPath>..\packages\FParsec.1.0.1\lib\net40-client\FParsec.dll</HintPath>
+    </Reference>
+    <Reference Include="FParsecCS">
+      <HintPath>..\packages\FParsec.1.0.1\lib\net40-client\FParsecCS.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.

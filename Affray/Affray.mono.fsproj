@@ -10,7 +10,7 @@
     <RootNamespace>Affray</RootNamespace>
     <AssemblyName>Affray</AssemblyName>
     <Name>Affray</Name>
-    <UsePartialTypes>false</UsePartialTypes>
+    <UsePartialTypes>False</UsePartialTypes>
     <BuildOrder>
       <BuildOrder>
         <String>Math.fs</String>
@@ -24,10 +24,10 @@
     </BuildOrder>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <DebugSymbols>true</DebugSymbols>
+    <DebugSymbols>True</DebugSymbols>
     <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <Tailcalls>false</Tailcalls>
+    <Optimize>False</Optimize>
+    <Tailcalls>False</Tailcalls>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
@@ -37,14 +37,14 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <Tailcalls>true</Tailcalls>
+    <Optimize>True</Optimize>
+    <Tailcalls>True</Tailcalls>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>x86</PlatformTarget>
     <DocumentationFile>bin\Release\Affray.XML</DocumentationFile>
-    <DebugSymbols>false</DebugSymbols>
+    <DebugSymbols>False</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib" />
@@ -53,6 +53,9 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Numerics" />
+    <Reference Include="CommandLine">
+      <HintPath>..\packages\CommandLineParser.1.9.3.19\lib\CommandLine.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Math.fs" />

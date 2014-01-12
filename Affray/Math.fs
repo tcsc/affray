@@ -87,7 +87,7 @@ type vector =
         sprintf "{x: %f, y: %f, z: %f}" self.x self.y self.z
 
     override self.GetHashCode () = 
-        (int)(self.x + self.y + selhs.z)
+        (int)(self.x + self.y + self.z)
 
 let positive_x = {x = 1.0; y = 0.0; z = 0.0}
 let positive_y = {x = 0.0; y = 1.0; z = 0.0}
