@@ -1,5 +1,6 @@
 module Scenefile
 
+open Affray.Colour
 open Affray.Scenefile
 open Affray.Geometry
 open Affray.Material
@@ -9,12 +10,15 @@ open Scene
 open NUnit.Framework
 open FParsec
 
+let test p str = runParserOnString p scene_state.empty "text" str
+let testWithState p str s = runParserOnString p s "text" str
+
 [<TestFixture>]
 type Geometry() = class
 
     [<Test>]
     member self.Vector () = 
-        match run vector "{1, 2, 3}" with
+        match test vector "{1, 2, 3}" with
         | Failure (err, _, _) -> Assert.Fail err
         | Success (v, _, _) -> 
             Assert.That (v.x, Is.EqualTo(1.0).Within(1e-8))
@@ -23,7 +27,7 @@ type Geometry() = class
 
     [<Test>]
     member self.VectorWithOddSpacing () = 
-        match run vector "{ 1,\r\n2 , 3   }" with
+        match test vector "{ 1,\r\n2 , 3   }" with
         | Failure (err, _, _) -> Assert.Fail err
         | Success (v, _, _) -> 
             Assert.That (v.x, Is.EqualTo(1.0).Within(1e-8))
@@ -32,7 +36,7 @@ type Geometry() = class
 
     [<Test>]
     member self.VectorWithNegatives () = 
-        match run vector "{-1, -2, -3}" with
+        match test vector "{-1, -2, -3}" with
         | Failure (err, _, _) -> Assert.Fail err
         | Success (v, _, _) -> 
             Assert.That (v.x, Is.EqualTo(-1).Within(1e-8))
@@ -41,7 +45,7 @@ type Geometry() = class
 
     [<Test>]
     member self.VectorWithFractions () = 
-        match run vector "{1.3, 2.2, 3.1}" with
+        match test vector "{1.3, 2.2, 3.1}" with
         | Failure (err, _, _) -> Assert.Fail err
         | Success (v, _, _) -> 
             Assert.That (v.x, Is.EqualTo(1.3).Within(1e-8))
@@ -50,7 +54,7 @@ type Geometry() = class
 
     [<Test>]
     member self.Sphere () = 
-        match run sphere "sphere { centre: {1, 2, 3}, radius: 5 }" with
+        match test sphere "sphere { centre: {1, 2, 3}, radius: 5 }" with
         | Failure (err,_,_) -> Assert.Fail err
         | Success (p, _, _) -> 
             match p with
@@ -62,7 +66,7 @@ type Geometry() = class
 
     [<Test>]
     member self.Plane () = 
-        match run plane "plane { normal: {1, 2, 3}, offset: 42}" with
+        match test plane "plane { normal: {1, 2, 3}, offset: 42}" with
         | Failure (err, _, _) -> Assert.Fail err
         | Success (p, _, _) -> 
             match p with
@@ -84,21 +88,21 @@ type Material() = class
                    " (0.50, {0.0, 1.0, 0.0})," +
                    " (0.75, {0.0, 0.0, 1.0})," + 
                     "(1,{1,1,1})]"
-        match run colour_map text with 
+        match test colour_map text with 
         | Failure (err,_,_) -> Assert.Fail err
         | Success (m,_,_) -> ()
 
     [<Test>]
     member self.Pigment_Gradient () = 
         let text = "gradient { direction: {3, 2, -1}, colours: [(0, {0,0,0}), (1, {1,1,1})] }"
-        match run gradient_pigment text with
+        match test gradient_pigment text with
         | Failure (err,_,_) -> Assert.Fail err
         | Success (p,_,_) -> ()
 
     [<Test>]
     member self.Material_Checkerboard () = 
         let text = "checkerboard {\n"                                            + 
-                   "  1: solid { pigment: {1, 0, 0},\n"                          + 
+                   "  1: solid { pigment: colour {1, 0, 0},\n"                   + 
                    "             finish: { opacity: 1,\n"                        +
                    "                       reflection: 0,\n"                     +
                    "                       ambient: 0.1,\n"                      +
@@ -122,12 +126,113 @@ type Material() = class
                    "              }\n"                                           + 
                    "  }\n"                                                       +
                    "}"
-        match run (material_checkerboard ()) text with
+        match test (material_checkerboard ()) text with
         | Failure (err, _, _) -> Assert.Fail err
         | Success (p, _, _) ->
             match p with 
             | Checkerboard (a, b) -> ()
             | _ -> Assert.Fail "Incorrect material type"
 
+    [<Test>]
+    member self.Material () = 
+        let text = "solid { pigment: colour {0, 0.5, 1}, "                  +  
+                   "        finish: { opacity: 1,\n"                        +
+                   "                  reflection: 0,\n"                     +
+                   "                  ambient: 0.1,\n"                      +
+                   "                  diffuse: 1.0,\n"                      + 
+                   "                  highlight: { intensity: 1.0,\n"       + 
+                   "                               size: 60.0 }\n"          +
+                   "        }\n"                                            +
+                   "}\n"
+        match test material text with
+        | Failure (err,_,_) -> Assert.Fail err
+        | Success (p,_,_) -> ()
 end
-               
+
+[<TestFixture>]
+type NamedObjects () = class
+    [<Test>]
+    member self.DeclareColor () = 
+        let text = "let colour red = { 1, 0, 0 }"
+        match test declaration text with
+        | Failure (err,_,_) -> Assert.Fail err
+        | Success (p,s,_) ->
+            Assert.That (s.colours.Count, Is.EqualTo 1)
+            Assert.That (Map.find "red" s.colours, Is.EqualTo red)
+
+     [<Test>]
+     member self.DeclareFinish () = 
+        let text = "let finish dull = { " + 
+                   "    opacity: 1,\n"                  +
+                   "    reflection: 0,\n"               +
+                   "    ambient: 0.1,\n"                +
+                   "    diffuse: 1.0,\n"                + 
+                   "    highlight: { intensity: 1.0,\n" + 
+                   "                 size: 1.0 }\n"     +
+                   " }\n"   
+        match test declaration text with 
+        | Failure (err,_,_) -> Assert.Fail err
+        | Success (_, s, _) ->
+            Assert.That (s.finishes.Count, Is.EqualTo 1)
+            let f = Map.find "dull" s.finishes
+            Assert.That (f.opacity,    Is.EqualTo 1.0)
+            Assert.That (f.reflection, Is.EqualTo 0.0)
+            Assert.That (f.ambient,    Is.EqualTo 0.1)
+            Assert.That (f.diffuse,    Is.EqualTo 1.0)
+
+    [<Test>]
+    member self.DeclareMaterial () = 
+        let text = "let material thingy = solid { " + 
+                   "    pigment: colour {1, 1, 1},                                      " +
+                   "    finish: { opacity: 1.0, reflection: 2.0, ambient: 3, diffuse: 4," +
+                   "              highlight: { intensity: 5, size: 6 }                  " +
+                   "    }                                                               " +
+                   "}"
+        match test declaration text with 
+        | Failure(err,_,_) -> Assert.Fail err
+        | Success(_,s,_) ->
+            Assert.That (s.materials.Count, Is.EqualTo 1)
+            match s.GetMaterial "thingy" with
+            | None -> Assert.Fail "No such material in the returned state"
+            | Some m -> 
+                match m with
+                | Solid (p, f) ->
+                    Assert.That (p, Is.EqualTo (Colour {r = 1.0; g = 1.0; b = 1.0}))
+                | _ -> Assert.Fail "Unexpected material"
+             
+    [<Test>]
+    member self.UseDeclaredColour () = 
+        let colours = Map.ofList [("red", {r = 1.0; g = 0.0; b = 0.0})]
+        let s = {scene_state.empty with colours = colours}
+        let text = "solid { pigment: colour red, " + 
+                   "        finish: { opacity: 1.0, reflection: 2.0, ambient: 3, diffuse: 4," +
+                   "                  highlight: { intensity: 5, size: 6 }                  " +
+                   "      }                                                                 " +
+                   "}"
+
+        match testWithState material text s with
+        | Failure (err,_,_) -> Assert.Fail err
+        | Success (p,_,_) ->
+            match p with
+            | Solid (p, _) -> 
+                match p with 
+                | Colour c -> Assert.That (c, Is.EqualTo {r = 1.0; g = 0.0; b = 0.0})
+                | _ -> Assert.Fail "Bad pigment"
+            | _ -> Assert.Fail "Unexpected material"
+
+    [<Test>]
+    member self.UseDeclaredFinish () = 
+        let dull_finish = {opacity = 1.0; reflection = 0.0; ambient = 1.0; diffuse = 6.0;
+                           highlight = {intensity = 0.1; size = 1.0}}
+        let finishes = Map.ofList [("dull", dull_finish)]
+        let s = {scene_state.empty with finishes = finishes}
+        let text = "solid { pigment: colour {0, 0, 0}, finish: dull }"
+
+        match testWithState material text s with
+        | Failure (err,_,_) -> Assert.Fail err
+        | Success (p,_,_) -> 
+            match p with
+            | Solid (_, f) -> Assert.That (f, Is.SameAs dull_finish)
+            | _ -> Assert.Fail "Unexpected material"
+
+end
