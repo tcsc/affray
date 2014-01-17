@@ -124,4 +124,13 @@
 	<Target Name="AfterBuild">
 	</Target>
 	-->
+  <ProjectExtensions>
+    <MonoDevelop>
+      <Properties>
+        <Policies>
+          <TextStylePolicy inheritsSet="VisualStudio" inheritsScope="text/plain" scope="text/x-fsharp" />
+        </Policies>
+      </Properties>
+    </MonoDevelop>
+  </ProjectExtensions>
 </Project>
