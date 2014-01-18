@@ -79,3 +79,5 @@ module Material =
 
         let pigment, finish = point_material pt mat
         in (pigment_colour pigment pt, finish)
+
+    let default_material = Solid (Colour {r = 1.0; g = 1.0; b = 1.0}, default_finish)
