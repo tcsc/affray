@@ -10,7 +10,10 @@ open Scene
 open NUnit.Framework
 open FParsec
 
-let test p str = runParserOnString p scene_state.empty "text" str
+let test p str = 
+    let materials = Map.ofList [("default", default_material)]
+    runParserOnString p {scene_state.empty with materials = materials} "text" str
+
 let testWithState p str s = runParserOnString p s "text" str
 
 [<TestFixture>]
@@ -54,11 +57,11 @@ type Geometry() = class
 
     [<Test>]
     member self.Sphere () = 
-        match test sphere "sphere { centre: {1, 2, 3}, radius: 5 }" with
+        match test sphere "sphere { centre: {1, 2, 3}, radius: 5, material: default }" with
         | Failure (err,_,_) -> Assert.Fail err
         | Success (p, _, _) -> 
             match p with
-            | Sphere s -> 
+            | {primitive = Sphere s} -> 
                 let expected = {sphere.centre = {x = 1.0; y = 2.0; z = 3.0}; radius = 5.0}
                 Assert.AreEqual (expected, s)
             | _ -> Assert.Fail()
@@ -66,11 +69,11 @@ type Geometry() = class
 
     [<Test>]
     member self.Plane () = 
-        match test plane "plane { normal: {1, 2, 3}, offset: 42}" with
+        match test plane "plane { normal: {1, 2, 3}, offset: 42, material: default}" with
         | Failure (err, _, _) -> Assert.Fail err
         | Success (p, _, _) -> 
             match p with
-            | Plane pl -> 
+            | {primitive = Plane pl} -> 
                 let expected = {normal = normalize {x = 1.0; y = 2.0; z = 3.0}; offset = 42.0}
                 Assert.That (pl.offset, Is.EqualTo(expected.offset).Within(1e-8))
                 Assert.That (pl.normal.x, Is.EqualTo(expected.normal.x).Within(1e-8))
@@ -191,7 +194,7 @@ type NamedObjects () = class
         match test declaration text with 
         | Failure(err,_,_) -> Assert.Fail err
         | Success(_,s,_) ->
-            Assert.That (s.materials.Count, Is.EqualTo 1)
+            Assert.That (s.materials.Count, Is.EqualTo 2) // allow for the default material
             match s.GetMaterial "thingy" with
             | None -> Assert.Fail "No such material in the returned state"
             | Some m -> 

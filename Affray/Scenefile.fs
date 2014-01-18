@@ -1,6 +1,7 @@
 namespace Affray
 
 open System
+open System.Text
 open System.IO
 open FParsec
 open FParsec.Error
@@ -9,6 +10,7 @@ open Affray.Colour
 open Affray.Material
 open Affray.Math
 open Affray.Geometry
+open PointLight
 open Scene
 
 module Scenefile = 
@@ -18,7 +20,9 @@ module Scenefile =
     type scene_state = 
         { colours: Map<string, colour>;
           finishes: Map<string, finish>;
-          materials: Map<string, material> }
+          materials: Map<string, material>;
+          camera_defined: bool;
+          scene: scene }
         
         member self.GetColour name = Map.tryFind name self.colours
         member self.GetFinish name = Map.tryFind name self.finishes
@@ -27,15 +31,29 @@ module Scenefile =
         static member empty 
             with get() = { colours = Map.empty; 
                            finishes = Map.empty; 
-                           materials = Map.empty }
+                           materials = Map.empty;
+                           camera_defined = false;
+                           scene = default_scene }
 
 
     let expression = spaces >>. pfloat .>> spaces
 
-    let delimited_block start finish p = (pstring start) >>. spaces >>. p .>> spaces .>> (pstring finish)
+    /// <summary>
+    /// A block delimted by a start and end string, with the content of the block defined 
+    /// by a given parser.
+    /// </summary>
+    let delimited_block start finish p = 
+        (pstring start) >>. spaces >>. p .>> spaces .>> (pstring finish)
 
+    /// <summary>
+    /// A brace-delimited block, with the content of the blok defined by a supplied 
+    /// parser.
+    /// </summary>
     let block p = delimited_block "{" "}" p
 
+    /// <summary>
+    /// A block with a name that identifies the content. 
+    /// </summary>
     let named_block name p = // name { p }
         (pstring name) >>. spaces >>. block p
 
@@ -51,7 +69,9 @@ module Scenefile =
     /// </summary>
     let symbol = spaces >>. (many1Satisfy (isLetter .||. (isAnyOf "_-"))) .>> spaces
 
-
+    /// <summary>
+    /// A named value fo the form "name: value".
+    /// </summary>
     let named_value name p = 
         spaces >>. (pstring name) >>. (pstring ":") >>. spaces >>. p .>> spaces
 
@@ -61,8 +81,8 @@ module Scenefile =
     let arg p = p .>> comma .>> spaces
 
     /// <summary>
-    /// A comma-separated list of options, Acts like the FParsec pipe, except each parser in the pipe 
-    /// (except the last) is expected to be followed by a comma and whitespace
+    /// A comma-separated list of options. Acts like the FParsec pipe, except each parser
+    /// in the pipe (except the last) is expected to be followed by a comma and whitespace.
     /// </summary>
     let arglist2 a1 a2 fn = pipe2 (arg a1) (a2) fn 
 
@@ -96,37 +116,12 @@ module Scenefile =
     /// </summary>
     let unit_vector = vector |>> normalize
 
-    /// <summary>
-    /// Parses a sphere primitive
-    /// </summary>  
-    let sphere = // sphere { centre: vector, radius: float }
-        named_block "sphere" (arglist2 (named_value "centre" vector)
-                                       (named_value "radius" expression)
-                                       (fun c r -> Sphere {centre = c; radius = r}))
+    // ------------------------------------------------------------------------------
+    // Colour parsing
+    // ------------------------------------------------------------------------------
 
     /// <summary>
-    /// Parses an an infinite plane 
-    /// </summary>
-    let plane = // plane { normal: vector, offset: float }
-        named_block "plane" (arglist2 (named_value "normal" unit_vector)
-                                      (named_value "offset" expression)
-                                      (fun n offs -> Plane {normal = n; offset = offs}))
-
-    /// <summary>
-    /// A plane bounded by some world-space constraints
-    /// </summary>
-    let bounded_plane =
-        named_block "bounded_plane" 
-            (arglist4 (named_value "normal" unit_vector)
-                      (named_value "offset" expression)
-                      (named_value "min" vector)
-                      (named_value "max" vector)
-                      (fun n o mn mx -> BoundedPlane {plane = {plane.normal = n; offset = o}; 
-                                                      min = mn; 
-                                                      max = mx}))
-
-    /// <summary>
-    /// {r, g, b}
+    /// A literal colour specification of the form {r, g, b}
     /// </summary>
     let colour_literal = 
         block (arglist3 expression
@@ -134,6 +129,9 @@ module Scenefile =
                         expression
                         (fun r g b -> {r = r; g = g; b = b}))
 
+    /// <summary>
+    /// A symbolic reference to a predefined colour object.
+    /// </summary>
     let colour_symbol = 
         fun stream -> 
             match symbol stream with
@@ -155,9 +153,15 @@ module Scenefile =
                 let colours' = Map.add name colour state.colours
                 let state' = {state with colours = colours'}
                 (setUserState state') stream       
+               
+    /// <summary>
+    /// A colur declaration of the form "let colour cname = {r, g, b}".
+    /// <summary>
+    let colour_declaration = let_binding "colour" colour_literal store_colour
 
-    let colour_declaration : Parser<unit,scene_state> = 
-        let_binding "colour" colour_literal store_colour
+    // ------------------------------------------------------------------------------
+    // Pigment Parsing
+    // ------------------------------------------------------------------------------
 
     let colour_point = delimited_block "(" ")" (arglist2 pfloat colour (fun p c -> (p, c)))
 
@@ -175,10 +179,17 @@ module Scenefile =
  
     let pigment = colour_pigment <|> gradient_pigment
 
-    let highlight = block (arglist2 (named_value "intensity" pfloat) 
-                                    (named_value "size" pfloat)
-                                    (fun i s -> {intensity = i; size = s}))
+    // ------------------------------------------------------------------------------
+    // Finish (i.e. lighting parameters) Parsing
+    // ------------------------------------------------------------------------------
 
+    let private highlight = block (arglist2 (named_value "intensity" pfloat) 
+                                            (named_value "size" pfloat)
+                                            (fun i s -> {intensity = i; size = s}))
+
+    /// <summary>
+    /// Parses a literal finish obje t embedded in the scene file.
+    /// </summary>
     let finish_literal = 
         block (arglist5 (named_value "opacity" pfloat)
                         (named_value "reflection" pfloat)
@@ -187,6 +198,10 @@ module Scenefile =
                         (named_value "highlight" highlight)
                         (fun o r a d h -> {opacity = o; reflection = r; ambient = a; diffuse = d; highlight = h}))
 
+    /// <summary>
+    /// Parses a symbolic reference to a finish object, and locates and returns the 
+    /// referenced finish object. The parser will fail if no such named finish exists.
+    /// </summary>
     let finish_symbol = 
         fun stream -> 
             match symbol stream with
@@ -221,6 +236,10 @@ module Scenefile =
     /// </summary>
     let finish_declaration = let_binding "finish" finish_literal store_finish 
 
+    // ------------------------------------------------------------------------------
+    // Material Parsing
+    // ------------------------------------------------------------------------------
+
     let material_solid = 
         named_block "solid"
             (arglist2 (named_value "pigment" pigment)
@@ -233,7 +252,25 @@ module Scenefile =
                       (named_value "2" material)
                       (fun a b -> Checkerboard (a, b)))
 
-    and material = material_solid <|> (material_checkerboard ())
+    and private material_literal = 
+        material_solid <|> (material_checkerboard ())
+
+    /// <summary>
+    /// Parses a symbolic reference to a material object, and locates and returns the 
+    /// referenced material. The parser will fail if no such named material exists.
+    /// </summary>
+    and private material_symbol = 
+        fun stream -> 
+            match symbol stream with
+            | r when r.Status = Ok -> 
+                let s = stream.UserState
+                match s.GetMaterial r.Result with
+                | Some m -> Reply(m)
+                | None -> Reply(Error, messageError(sprintf "undefined material: %s" r.Result))
+            | r -> Reply(Error, r.Error)
+
+    and material = 
+        material_literal <|> material_symbol
 
     /// <summary>
     /// Returns a parser that stores the suppiled material in the scene_state, iff a material 
@@ -256,6 +293,124 @@ module Scenefile =
     /// </summary>
     let material_declaration = let_binding "material" material store_material
 
+    // ------------------------------------------------------------------------------
+    // Geometry Primitives
+    // ------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Parses a sphere primitive
+    /// </summary>  
+    let sphere = // sphere { centre: vector, radius: float }
+        named_block "sphere" (arglist3 (named_value "centre" vector)
+                                       (named_value "radius" expression)
+                                       (named_value "material" material)
+                                       (fun c r mat -> 
+                                         let p = Sphere {centre = c; radius = r}
+                                         in { primitive = p; material = mat} ))
+
+    /// <summary>
+    /// Parses an an infinite plane 
+    /// </summary>
+    let plane = // plane { normal: vector, offset: float }
+        named_block "plane" (arglist3 (named_value "normal" unit_vector)
+                                      (named_value "offset" expression)
+                                      (named_value "material" material)
+                                      (fun n offs mat -> 
+                                        let p = Plane { normal = n; offset = offs }
+                                        in { primitive = p; material = mat }))
+
+    /// <summary>
+    /// A plane bounded by some world-space constraints
+    /// </summary>
+    let bounded_plane =
+        named_block "bounded_plane" 
+            (arglist5 (named_value "normal" unit_vector)
+                      (named_value "offset" expression)
+                      (named_value "min" vector)
+                      (named_value "max" vector)
+                      (named_value "material" material)
+                      (fun n o min max mat -> 
+                        let plane = {plane.normal = n; offset = o}
+                        let p = BoundedPlane {plane = plane; min = min; max = max}
+                        in { primitive = p; material = mat }))
+
+    let primitive = sphere <|> plane <|> bounded_plane
+
+    let store_object obj = 
+        fun (stream: CharStream<scene_state>) -> 
+            let state = stream.UserState
+            let objs' = obj :: state.scene.objects
+            let scene' = {state.scene with objects = objs'}
+            (setUserState {state with scene = scene'}) stream
+
+    let obj = primitive >>= store_object
+
+    // ------------------------------------------------------------------------------
+    // Lights
+    // ------------------------------------------------------------------------------
+
+    let point_light = 
+        named_block "point_light" 
+            (arglist2 (named_value "location" vector)
+                      (named_value "colour" colour)
+                      (fun loc col -> PointSource {location = loc; colour = col}))
+
+    let store_light l = 
+        fun (stream: CharStream<scene_state>) ->
+            let state = stream.UserState 
+            let lights' = l :: state.scene.lights 
+            let scene' = {stream.UserState.scene with lights = lights'}
+            (setUserState {state with scene = scene'}) stream
+
+    let light = (point_light) >>= store_light
+
+    // ------------------------------------------------------------------------------
+    // Camera
+    // ------------------------------------------------------------------------------
+
+    /// <summary>
+    /// Parses a camera declaration of the form "camera { ... }"
+    /// </summary>
+    let camera_declaration : Parser<camera, scene_state> = 
+        named_block "camera"
+            (arglist5 (named_value "location" vector)
+                      (named_value "direction" vector)
+                      (named_value "up" unit_vector)
+                      (named_value "h_fov" expression)
+                      (named_value "v_fov" expression)
+                      (fun loc dir up hfov vfov -> 
+                        let h = to_radians (hfov * 1.0<degrees>)
+                        let v = to_radians (vfov * 1.0<degrees>)
+                        { location=loc; 
+                          direction=dir; 
+                          up = up;
+                          horizontal_fov = h;
+                          vertical_fov = v }))
+
+    /// <summary>
+    /// Updates the state object with the new camera. Fails if a non-default camera has
+    /// already been defined.
+    /// </summary>
+    let store_camera cam : Parser<unit,scene_state> = 
+        fun (stream: CharStream<scene_state>) ->
+            let state = stream.UserState
+            match state.camera_defined with 
+            | true -> Reply(Error, messageError("Camera already defined"))
+            | false -> 
+                let scene' = {state.scene with camera = cam}
+                let state' = {state with camera_defined = true; scene = scene'}
+                (setUserState state') stream
+
+    /// <summary>
+    /// Parses a camera declaration and updates the state block. There may only be one
+    /// camera definition per scene.
+    /// </summary>
+    let camera : Parser<unit,scene_state> = camera_declaration >>= store_camera
+
+    // ------------------------------------------------------------------------------
+    // Top level constructs
+    // ------------------------------------------------------------------------------
+
     /// <summary>
     /// Any sort of let ... binding
     /// </summary>
@@ -263,8 +418,15 @@ module Scenefile =
                       (attempt finish_declaration) <|> 
                       (attempt material_declaration)
 
+    let scene = many (declaration <|> camera <|> obj)
 
-    let primitive = sphere <|> plane <|> bounded_plane
+    /// <summary>
+    /// Parses a scene object out of a stream
+    /// </summary> 
+    let parse_scene (stream: Stream) (name: string) : scene = 
+        match runParserOnStream scene (scene_state.empty) name stream Encoding.UTF8 with
+        | Success (_,state,_) -> state.scene 
+        | Failure (err,_,_) -> failwith err
 
 //    let parse_scene src = run primitive src
 
