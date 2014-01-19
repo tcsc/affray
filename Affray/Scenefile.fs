@@ -73,16 +73,17 @@ module Scenefile =
     /// <summary>
     /// An arbitrary comination of letters and some punctuation.
     /// </summary>
-    let symbol = spaces >>. (many1Satisfy (isLetter .||. (isAnyOf "_-"))) .>> spaces
+    let symbol = 
+        spaces >>. (many1Satisfy (isLetter .||. (isAnyOf "_-"))) .>> spaces
 
     /// <summary>
-    /// A named value fo the form "name: value".
+    /// A named value of the form "name: value".
     /// </summary>
     let named_value name p = 
         spaces >>. (pstring name) >>. (pstring ":") >>. spaces >>. p .>> spaces
 
     /// <summary>
-    /// A paraser follerd by a comma and (optional) spaces
+    /// A parser follewed by a comma and (optional) spaces
     /// </summary>
     let arg p = p .>> comma .>> spaces
 
@@ -99,8 +100,18 @@ module Scenefile =
     let arglist5 a1 a2 a3 a4 a5 fn = pipe5 (arg a1) (arg a2) (arg a3) (arg a4) a5 fn
 
     /// <summary>
-    /// The structure for a declaration.
+    /// The structure for a let declaration (of the form "let <typename> <symbol> = <literal>").
     /// </summary>
+    /// <param name="typename">
+    /// The type of object to declare, e.g. "colour", "finish".
+    /// </param>
+    /// <param name="p">
+    /// A parser that parses the literal form of the object you want to declare.
+    /// </param>
+    /// <param name="storefn">
+    /// A function that returns a parser which can has the side-effect of storing the 
+    /// declared object in the scene state.
+    /// </param>
     let let_binding (typename: string) (p: Parser<'a,scene_state>) storefn : Parser<unit,scene_state> =
         let binding = (((pstring "let") >>. spaces >>. (pstring typename) >>. symbol) 
                        .>>. 
