@@ -36,7 +36,7 @@
     <PlatformTarget>x86</PlatformTarget>
     <DocumentationFile>bin\Debug\Affray.XML</DocumentationFile>
     <StartArguments>--width 1280 --height 1024 --scene scene.affray</StartArguments>
-    <Commandlineparameters>-s scenefile.fs</Commandlineparameters>
+    <Commandlineparameters>-s ../../../Scenes/test.affray</Commandlineparameters>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <DebugType>pdbonly</DebugType>

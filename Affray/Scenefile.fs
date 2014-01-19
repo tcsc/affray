@@ -43,7 +43,7 @@ module Scenefile =
     /// by a given parser.
     /// </summary>
     let delimited_block start finish p = 
-        (pstring start) >>. spaces >>. p .>> spaces .>> (pstring finish)
+        (pstring start) >>. spaces >>. p .>> spaces .>> (pstring finish) .>> spaces
 
     /// <summary>
     /// A brace-delimited block, with the content of the blok defined by a supplied 
@@ -58,6 +58,12 @@ module Scenefile =
         (pstring name) >>. spaces >>. block p
 
     let comma = pstring ","
+
+    /// <summary>
+    /// C++ style single-line comment
+    /// </summary>
+    let comment : Parser<unit,scene_state> = 
+        (pstring "//") .>> (skipRestOfLine true) |>> ignore
 
     /// <summary>
     /// Predicate chaining OR, i.e. (f .||. g) x -> f x || g x
@@ -96,9 +102,9 @@ module Scenefile =
     /// The structure for a declaration.
     /// </summary>
     let let_binding (typename: string) (p: Parser<'a,scene_state>) storefn : Parser<unit,scene_state> =
-        let binding = ((pstring "let") >>. spaces >>. (pstring typename) >>. symbol) 
-                      .>>. 
-                      ((pstring "=") >>. spaces >>. p)
+        let binding = (((pstring "let") >>. spaces >>. (pstring typename) >>. symbol) 
+                       .>>. 
+                       ((pstring "=") >>. spaces >>. p)) .>> spaces
         fun (stream: CharStream<scene_state>) ->
             match binding stream with
             | r when r.Status = Ok -> storefn r.Result stream
@@ -240,26 +246,28 @@ module Scenefile =
     // Material Parsing
     // ------------------------------------------------------------------------------
 
+    let material, private materialImpl = createParserForwardedToRef()
+
     let material_solid = 
         named_block "solid"
             (arglist2 (named_value "pigment" pigment)
                       (named_value "finish" finish)
-                      (fun p f -> Solid (p, f))) 
+                      (fun p f -> Solid (p, f)))
 
-    let rec material_checkerboard _ =
+    let material_checkerboard =
         named_block "checkerboard"
             (arglist2 (named_value "1" material)
                       (named_value "2" material)
                       (fun a b -> Checkerboard (a, b)))
 
-    and private material_literal = 
-        material_solid <|> (material_checkerboard ())
+    let private material_literal = 
+        material_solid <|> material_checkerboard
 
     /// <summary>
     /// Parses a symbolic reference to a material object, and locates and returns the 
     /// referenced material. The parser will fail if no such named material exists.
     /// </summary>
-    and private material_symbol = 
+    let private material_symbol = 
         fun stream -> 
             match symbol stream with
             | r when r.Status = Ok -> 
@@ -269,8 +277,7 @@ module Scenefile =
                 | None -> Reply(Error, messageError(sprintf "undefined material: %s" r.Result))
             | r -> Reply(Error, r.Error)
 
-    and material = 
-        material_literal <|> material_symbol
+    do materialImpl := (attempt material_literal) <|> material_symbol
 
     /// <summary>
     /// Returns a parser that stores the suppiled material in the scene_state, iff a material 
@@ -374,18 +381,18 @@ module Scenefile =
     let camera_declaration : Parser<camera, scene_state> = 
         named_block "camera"
             (arglist5 (named_value "location" vector)
-                      (named_value "direction" vector)
+                      (named_value "look_at" vector)
                       (named_value "up" unit_vector)
                       (named_value "h_fov" expression)
                       (named_value "v_fov" expression)
-                      (fun loc dir up hfov vfov -> 
+                      (fun loc lookat up hfov vfov -> 
                         let h = to_radians (hfov * 1.0<degrees>)
                         let v = to_radians (vfov * 1.0<degrees>)
-                        { location=loc; 
-                          direction=dir; 
-                          up = up;
-                          horizontal_fov = h;
-                          vertical_fov = v }))
+                        let cam  = { default_camera with location = loc; 
+                                                         up = up;
+                                                         horizontal_fov = h;
+                                                         vertical_fov = v }
+                        look_at lookat cam))
 
     /// <summary>
     /// Updates the state object with the new camera. Fails if a non-default camera has
@@ -418,7 +425,7 @@ module Scenefile =
                       (attempt finish_declaration) <|> 
                       (attempt material_declaration)
 
-    let scene = many (declaration <|> camera <|> obj)
+    let scene = (many (declaration <|> camera <|> light <|> obj <|> comment)) .>> eof
 
     /// <summary>
     /// Parses a scene object out of a stream

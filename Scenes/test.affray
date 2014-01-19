@@ -1,0 +1,76 @@
+let colour white = {1, 1, 1}
+let colour red   = {1, 0, 0}
+let colour green = {0, 1, 0}
+let colour blue  = {0, 0, 1}
+
+let finish default = { opacity: 1, reflection: 0.5, ambient: 0.15, diffuse: 1.0,
+                       highlight: {intensity: 1, size: 60} }
+
+let finish dull = { opacity: 1, reflection: 0.0, ambient: 0.1, diffuse: 1.0,
+                    highlight: {intensity: 1, size: 60} }
+
+let finish mid = { opacity: 1, reflection: 0.5, ambient: 0.1, diffuse: 1.0,
+                   highlight: {intensity: 1, size: 60} }
+
+let finish shiny = { opacity: 0.5, reflection: 1, ambient: 0.5, diffuse: 1.5,
+                     highlight: {intensity: 2, size: 0} }
+
+let material checkerboard = checkerboard {
+  1: solid { pigment: colour red, finish: default },
+  2: solid { pigment: colour {0.8, 0.8, 0.8}, finish: default }
+} 
+
+camera { location: {0, 10, 15}, 
+         look_at: {0, 2, 0},
+         up: {0, 1, 0},
+         h_fov: 40,
+         v_fov: 30 } 
+
+
+sphere { centre: {2.0, 2.0, 2.0}, 
+         radius: 0.5, 
+         material: solid { pigment: colour green, 
+                           finish: { opacity: 1, 
+                                     reflection: 0.99, 
+                                     ambient: 0.15,
+                                     diffuse: 1.0,
+                                     highlight: { intensity: 1, size: 60 }
+                           }
+         }
+}
+                                             
+sphere { centre: {3.0, 1.0, 1.0}, 
+         radius: 1.0, 
+         material: solid { pigment: colour blue, 
+                           finish: { opacity: 1, 
+                                     reflection: 0.25, 
+                                     ambient: 0.15,
+                                     diffuse: 1,
+                                     highlight: { intensity: 1, size: 60 }
+                           }
+         }
+}
+
+sphere { centre: {-2, 1, 4}, 
+         radius: 1.0, 
+         material: solid {pigment: colour blue, finish: default} }
+
+sphere { centre: {0, 2, 0}, radius: 2, material: checkerboard { 
+  1: solid { pigment: colour red, finish: dull }, 
+  2: solid { pigment: colour white, finish: mid }
+}}
+
+sphere { centre: {-2.5, 1, -2}, 
+         radius: 0.5, 
+         material: solid { pigment: colour red, finish: default }}
+
+bounded_plane { 
+  normal: {0, 1, 0}, 
+  offset: -0.01, 
+  min: {-5, -0.1, -5}, 
+  max: {5, 0.1, 5},
+  material: checkerboard
+}
+
+point_light { location: {100, 300, 100}, colour: {0.9, 0.9, 0.9} }
+point_light { location: {-10, -0.5, 10}, colour: {0.25, 0.25, 0.25} }

@@ -1,5 +1,9 @@
 module Scenefile
 
+open System
+open System.Text
+open System.IO
+
 open Affray.Colour
 open Affray.Scenefile
 open Affray.Geometry
@@ -129,7 +133,7 @@ type Material() = class
                    "              }\n"                                           + 
                    "  }\n"                                                       +
                    "}"
-        match test (material_checkerboard ()) text with
+        match test material_checkerboard text with
         | Failure (err, _, _) -> Assert.Fail err
         | Success (p, _, _) ->
             match p with 
@@ -224,6 +228,20 @@ type NamedObjects () = class
             | _ -> Assert.Fail "Unexpected material"
 
     [<Test>]
+    member self.UseUnDeclaredColour () = 
+        let colours = Map.ofList [("red", {r = 1.0; g = 0.0; b = 0.0})]
+        let s = {scene_state.empty with colours = colours}
+        let text = "solid { pigment: colour green, " + 
+                   "        finish: { opacity: 1.0, reflection: 2.0, ambient: 3, diffuse: 4," +
+                   "                  highlight: { intensity: 5, size: 6 }                  " +
+                   "      }                                                                 " +
+                   "}"
+
+        match testWithState material text s with
+        | Failure (err,_,_) -> Assert.That (err, Contains.Substring "undefined colour: green")
+        | Success (p,_,_) -> Assert.Fail "Unexpected success!"
+
+    [<Test>]
     member self.UseDeclaredFinish () = 
         let dull_finish = {opacity = 1.0; reflection = 0.0; ambient = 1.0; diffuse = 6.0;
                            highlight = {intensity = 0.1; size = 1.0}}
@@ -237,5 +255,37 @@ type NamedObjects () = class
             match p with
             | Solid (_, f) -> Assert.That (f, Is.SameAs dull_finish)
             | _ -> Assert.Fail "Unexpected material"
+end
 
+
+[<TestFixture>]
+type FullScene () = class
+    [<Test>]
+    member self.Simple () =
+        let text = "let colour white = {1, 1, 1}\n" + 
+                   "let finish shiny = { opacity: 1.0, reflection: 0.9, ambient: 0.15, diffuse: 1.0,\n" + 
+                   "                     highlight: { intensity: 1, size: 60.0 } }\n" +
+                   "let material shiny_white = solid{ pigment: colour white, finish: shiny }\n" + 
+                   "point_light { location: {100, 300, 100}, colour: {0.9, 0.9, 0.9} }\n" + 
+                   "// a big, bright, shiny sphere\n" +
+                   "sphere { centre: {0, 0, 0}, radius: 1, material: shiny_white }"
+        use stream = new MemoryStream(Encoding.UTF8.GetBytes(text))
+        let s = parse_scene stream "text"
+        Assert.That (s.lights.Length, Is.EqualTo 1)
+
+        Assert.That (s.objects.Length, Is.EqualTo 1)
+        let {primitive = p; material = m} = s.objects.Head
+        match p with
+        | Sphere {centre = c; radius = r} -> 
+            Assert.That (c, Is.EqualTo {x = 0.0; y = 0.0; z = 0.0}) 
+            Assert.That (r, Is.EqualTo 1.0) 
+        | _ -> Assert.Fail "Bad primitive"
+
+        match m with
+        | Solid (p, f) ->
+            Assert.That (p, Is.EqualTo (Colour {r = 1.0; g = 1.0; b = 1.0}))
+            let expected_finish = { opacity = 1.0; reflection = 0.9; ambient = 0.15; diffuse = 1.0; 
+                                    highlight = {intensity = 1.0; size = 60.0}}
+            Assert.That (f, Is.EqualTo expected_finish)
+        | _ -> Assert.Fail "Bad material type"
 end
