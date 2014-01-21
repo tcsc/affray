@@ -145,7 +145,7 @@ module Scenefile =
                 let s = stream.UserState
                 match Map.tryFind r.Result s.colours with
                 | Some c -> Reply(c)
-                | None -> Reply(Error, messageError(sprintf "undefined colour: %s" r.Result))
+                | None -> (failFatally (sprintf "undefined colour: %s" r.Result)) stream
             | r -> Reply(Error, r.Error)
 
     let colour = colour_literal <|> colour_symbol 
@@ -154,7 +154,7 @@ module Scenefile =
         fun stream ->
             let state = stream.UserState
             match Map.containsKey name state.colours with
-            | true -> Reply(Error, messageError(sprintf "colour %s already defined" name))
+            | true -> (failFatally (sprintf "colour %s already defined" name)) stream
             | false ->
                 let colours' = Map.add name colour state.colours
                 let state' = {state with colours = colours'}
@@ -215,7 +215,7 @@ module Scenefile =
                 let s = stream.UserState
                 match s.GetFinish r.Result with
                 | Some f -> Reply(f)
-                | None -> Reply(Error, messageError(sprintf "undefined finish: %s" r.Result))
+                | None -> stream |> failFatally (sprintf "undefined finish: %s" r.Result)
             | r -> Reply(Error, r.Error)
 
     /// <summary>
@@ -231,7 +231,7 @@ module Scenefile =
         fun stream ->
             let state = stream.UserState
             match Map.containsKey name state.finishes with
-            | true -> Reply(Error, messageError(sprintf "finish %s already defined" name))
+            | true -> stream |> failFatally (sprintf "finish %s already defined" name)
             | false ->
                 let finishes' = Map.add name finish state.finishes
                 let state' = {state with finishes = finishes'}
@@ -274,10 +274,10 @@ module Scenefile =
                 let s = stream.UserState
                 match s.GetMaterial r.Result with
                 | Some m -> Reply(m)
-                | None -> Reply(Error, messageError(sprintf "undefined material: %s" r.Result))
+                | None -> stream |> failFatally (sprintf "undefined material: %s" r.Result)
             | r -> Reply(Error, r.Error)
 
-    do materialImpl := (attempt material_literal) <|> material_symbol
+    do materialImpl := material_literal <|> material_symbol
 
     /// <summary>
     /// Returns a parser that stores the suppiled material in the scene_state, iff a material 
@@ -287,7 +287,7 @@ module Scenefile =
         fun stream ->
             let state = stream.UserState
             match Map.containsKey name state.finishes with
-            | true -> Reply(Error, messageError(sprintf "finish %s already defined" name))
+            | true -> stream |> failFatally (sprintf "finish %s already defined" name)
             | false ->
                 let materials' = Map.add name material state.materials
                 let state' = {state with materials = materials'}
@@ -341,7 +341,16 @@ module Scenefile =
                         let p = BoundedPlane {plane = plane; min = min; max = max}
                         in { primitive = p; material = mat }))
 
-    let primitive = sphere <|> plane <|> bounded_plane
+    let box = 
+        named_block "box"
+            (arglist3 (named_value "min" vector)
+                      (named_value "max" vector)
+                      (named_value "material" material)
+                      (fun min max mat ->
+                         let b = Box {lower = min; upper = max}
+                         in { primitive = b; material = mat })) 
+
+    let primitive = sphere <|> plane <|> bounded_plane <|> box
 
     let store_object obj = 
         fun (stream: CharStream<scene_state>) -> 
@@ -435,8 +444,3 @@ module Scenefile =
         | Success (_,state,_) -> state.scene 
         | Failure (err,_,_) -> failwith err
 
-//    let parse_scene src = run primitive src
-
-//    let load_scene (filename: string) = 
-//        let text = File.ReadAllText filename
-//        parse_scene text

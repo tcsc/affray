@@ -1,0 +1,15 @@
+let colour white = {1, 1, 1}
+let finish dull = { opacity: 1, reflection: 0.0, ambient: 0.1, diffuse: 1.0,
+                    highlight: {intensity: 1, size: 60} }
+let material dull_white = solid { pigment: colour white, finish: dull }
+
+camera { location: {-10, 10, 15}, 
+         look_at: {0, 2, 0},
+         up: {0, 1, 0},
+         h_fov: 40,
+         v_fov: 30 } 
+
+box { min: {-1, -1, -1}, max: {1, 1, 1}, material: dull_white }
+
+point_light { location: {100, 300, 100}, colour: {0.9, 0.9, 0.9} }
+point_light { location: {-10, -0.5, 10}, colour: {0.25, 0.25, 0.25} }

@@ -89,9 +89,12 @@ type vector =
     override self.GetHashCode () = 
         (int)(self.x + self.y + self.z)
 
-let positive_x = {x = 1.0; y = 0.0; z = 0.0}
-let positive_y = {x = 0.0; y = 1.0; z = 0.0}
-let positive_z = {x = 0.0; y = 0.0; z = 1.0}
+let positive_x = {x = 1.0;  y = 0.0;  z = 0.0}
+let positive_y = {x = 0.0;  y = 1.0;  z = 0.0}
+let positive_z = {x = 0.0;  y = 0.0;  z = 1.0}
+let negative_x = {x = -1.0; y = 0.0;  z = 0.0}
+let negative_y = {x = 0.0;  y = -1.0; z = 0.0}
+let negative_z = {x = 0.0;  y = 0.0;  z = -1.0}
 
 /// <summary>
 /// Defines a 4x4 matrix for manipulating 3d vectors and points in 

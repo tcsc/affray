@@ -84,6 +84,17 @@ type Geometry() = class
                 Assert.That (pl.normal.y, Is.EqualTo(expected.normal.y).Within(1e-8))
                 Assert.That (pl.normal.z, Is.EqualTo(expected.normal.z).Within(1e-8))
             | _ -> Assert.Fail ()
+
+    [<Test>]
+    member self.Box () = 
+        match test box "box { min: {-1, -1, -1}, max: {1, 1, 1}, material: default}" with
+        | Failure (err, _, _) -> Assert.Fail err
+        | Success (p, _, _) ->
+            match p with 
+            | {primitive = Box b} ->
+                Assert.That (b.lower, Is.EqualTo {x = -1.0; y = -1.0; z = -1.0})  
+                Assert.That (b.upper, Is.EqualTo {x = 1.0; y = 1.0; z = 1.0})  
+            | _ -> Assert.Fail "Wrong primitive"
 end
 
 [<TestFixture>]

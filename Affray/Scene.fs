@@ -9,6 +9,7 @@ open PointLight
 type primitive = Sphere of sphere
                | Plane of plane
                | BoundedPlane of bounded_plane
+               | Box of box
 
 type obj = 
     {primitive: primitive; material: material}
@@ -82,12 +83,14 @@ let intersects (r: ray) (o: obj) =
     | Sphere s -> ray_sphere_intersection r s
     | Plane p -> ray_plane_intersection r p
     | BoundedPlane p -> ray_bounded_plane_intersection r p
+    | Box b -> ray_box_intersection r b
     
 let surface_normal (p: point) (o: obj) = 
     match o.primitive with
     | Sphere s -> sphere_normal_at p s
     | Plane p -> p.normal
     | BoundedPlane p -> p.plane.normal
+    | Box b -> box_normal_at p b
      
 type ray_context = {x: int; y: int; r: ray} 
    

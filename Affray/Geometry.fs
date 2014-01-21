@@ -95,3 +95,47 @@ module Geometry =
                 then Some t 
                 else None
         | None -> None
+
+    let private sort a b = 
+        if a < b then (a, b) else (b, a)
+
+    /// <summary>
+    /// Calculates the intersection point of an axis-aligned box 
+    /// </summary>
+    let ray_box_intersection (r: ray) (b: box) = 
+        let mutable tmin = Double.NegativeInfinity
+        let mutable tmax = Double.PositiveInfinity
+
+        let t_min_x, t_max_x = sort ((b.lower.x - r.src.x) / r.direction.x) 
+                                    ((b.upper.x - r.src.x) / r.direction.x)
+        tmin <- max t_min_x tmin
+        tmax <- min t_max_x tmax
+
+        if (tmin > tmax) || (tmax < 0.0) 
+            then None // no intersection missed the box, or ray origin in front of the box 
+            else 
+                let t_min_y, t_max_y = sort ((b.lower.y - r.src.y) / r.direction.y)
+                                            ((b.upper.y - r.src.y) / r.direction.y)
+                tmin <- max t_min_y tmin
+                tmax <- min t_max_y tmax
+                if (tmin > tmax) || (tmax < 0.0) 
+                    then None
+                    else 
+                        let t_min_z, t_max_z = sort ((b.lower.z - r.src.z) / r.direction.z)
+                                                    ((b.upper.z - r.src.z) / r.direction.z)
+                        tmin <- max t_min_z tmin
+                        tmax <- min t_max_z tmax
+                        if (tmin > tmax) || (tmax < 0.0) 
+                            then None
+                            else Some tmin
+
+                           
+    let box_normal_at (p: point) (b: box) = 
+        let e = 1e-10
+        if (abs (p.x - b.lower.x)) < e then negative_x
+        elif (abs (p.x - b.upper.x)) < e then positive_x
+        elif (abs (p.y - b.lower.y)) < e then negative_y
+        elif (abs (p.y - b.upper.y)) < e then positive_y
+        elif (abs (p.z - b.lower.y)) < e then negative_z
+        elif (abs (p.z - b.upper.z)) < e then positive_z
+        else failwith "Point not on cube"
