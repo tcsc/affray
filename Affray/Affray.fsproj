@@ -17,6 +17,7 @@
         <String>Colour.fs</String>
         <String>PointLight.fs</String>
         <String>Material.fs</String>
+        <String>Primitive.fs</String>
         <String>Scene.fs</String>
         <String>Renderer.fs</String>
         <String>Scenefile.fs</String>
@@ -77,6 +78,7 @@
     <Compile Include="Colour.fs" />
     <Compile Include="PointLight.fs" />
     <Compile Include="Material.fs" />
+    <Compile Include="Primitive.fs" />
     <Compile Include="Scene.fs" />
     <Compile Include="Renderer.fs" />
     <Compile Include="Scenefile.fs" />

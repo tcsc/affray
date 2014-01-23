@@ -7,6 +7,7 @@ open System.IO
 open Affray.Colour
 open Affray.Scenefile
 open Affray.Geometry
+open Affray.Primitive
 open Affray.Material
 open Affray.Math
 open Scene
@@ -65,9 +66,9 @@ type Geometry() = class
         | Failure (err,_,_) -> Assert.Fail err
         | Success (p, _, _) -> 
             match p with
-            | {primitive = Sphere s} -> 
-                let expected = {sphere.centre = {x = 1.0; y = 2.0; z = 3.0}; radius = 5.0}
-                Assert.AreEqual (expected, s)
+            | :? Sphere as s -> 
+                Assert.That ({x = 1.0; y = 2.0; z = 3.0}, Is.EqualTo s.Centre)
+                Assert.That (5, Is.EqualTo s.Radius)
             | _ -> Assert.Fail()
             
 
@@ -77,12 +78,12 @@ type Geometry() = class
         | Failure (err, _, _) -> Assert.Fail err
         | Success (p, _, _) -> 
             match p with
-            | {primitive = Plane pl} -> 
-                let expected = {normal = normalize {x = 1.0; y = 2.0; z = 3.0}; offset = 42.0}
-                Assert.That (pl.offset, Is.EqualTo(expected.offset).Within(1e-8))
-                Assert.That (pl.normal.x, Is.EqualTo(expected.normal.x).Within(1e-8))
-                Assert.That (pl.normal.y, Is.EqualTo(expected.normal.y).Within(1e-8))
-                Assert.That (pl.normal.z, Is.EqualTo(expected.normal.z).Within(1e-8))
+            | :? Plane as p  -> 
+                let expected = normalize {x = 1.0; y = 2.0; z = 3.0}
+                Assert.That (p.Offset, Is.EqualTo(42).Within(1e-8))
+                Assert.That (p.Normal.x, Is.EqualTo(expected.x).Within(1e-8))
+                Assert.That (p.Normal.y, Is.EqualTo(expected.y).Within(1e-8))
+                Assert.That (p.Normal.z, Is.EqualTo(expected.z).Within(1e-8))
             | _ -> Assert.Fail ()
 
     [<Test>]
@@ -91,9 +92,9 @@ type Geometry() = class
         | Failure (err, _, _) -> Assert.Fail err
         | Success (p, _, _) ->
             match p with 
-            | {primitive = Box b} ->
-                Assert.That (b.lower, Is.EqualTo {x = -1.0; y = -1.0; z = -1.0})  
-                Assert.That (b.upper, Is.EqualTo {x = 1.0; y = 1.0; z = 1.0})  
+            | :? Box as b ->
+                Assert.That (b.Lower, Is.EqualTo {x = -1.0; y = -1.0; z = -1.0})  
+                Assert.That (b.Upper, Is.EqualTo {x = 1.0; y = 1.0; z = 1.0})  
             | _ -> Assert.Fail "Wrong primitive"
 end
 
@@ -285,14 +286,14 @@ type FullScene () = class
         Assert.That (s.lights.Length, Is.EqualTo 1)
 
         Assert.That (s.objects.Length, Is.EqualTo 1)
-        let {primitive = p; material = m} = s.objects.Head
+        let p  = s.objects.Head
         match p with
-        | Sphere {centre = c; radius = r} -> 
-            Assert.That (c, Is.EqualTo {x = 0.0; y = 0.0; z = 0.0}) 
-            Assert.That (r, Is.EqualTo 1.0) 
+        | :? Sphere as s ->
+            Assert.That (s.Centre, Is.EqualTo {x = 0.0; y = 0.0; z = 0.0}) 
+            Assert.That (s.Radius, Is.EqualTo 1.0) 
         | _ -> Assert.Fail "Bad primitive"
 
-        match m with
+        match p.Material with
         | Solid (p, f) ->
             Assert.That (p, Is.EqualTo (Colour {r = 1.0; g = 1.0; b = 1.0}))
             let expected_finish = { opacity = 1.0; reflection = 0.9; ambient = 0.15; diffuse = 1.0; 

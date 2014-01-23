@@ -9,7 +9,7 @@ open FParsec.Error
 open Affray.Colour
 open Affray.Material
 open Affray.Math
-open Affray.Geometry
+open Affray.Primitive
 open PointLight
 open Scene
 
@@ -322,9 +322,7 @@ module Scenefile =
         named_block "sphere" (arglist3 (named_value "centre" vector)
                                        (named_value "radius" expression)
                                        (named_value "material" material)
-                                       (fun c r mat -> 
-                                         let p = Sphere {centre = c; radius = r}
-                                         in { primitive = p; material = mat} ))
+                                       (fun c r mat -> Sphere (c, r, mat) :> Primitive))
 
     /// <summary>
     /// Parses an an infinite plane 
@@ -333,9 +331,7 @@ module Scenefile =
         named_block "plane" (arglist3 (named_value "normal" unit_vector)
                                       (named_value "offset" expression)
                                       (named_value "material" material)
-                                      (fun n offs mat -> 
-                                        let p = Plane { normal = n; offset = offs }
-                                        in { primitive = p; material = mat }))
+                                      (fun n offs mat -> Plane (n, offs, mat) :> Primitive))
 
     /// <summary>
     /// A plane bounded by some world-space constraints
@@ -348,20 +344,17 @@ module Scenefile =
                       (named_value "max" vector)
                       (named_value "material" material)
                       (fun n o min max mat -> 
-                        let plane = {plane.normal = n; offset = o}
-                        let p = BoundedPlane {plane = plane; min = min; max = max}
-                        in { primitive = p; material = mat }))
-
-    let box = 
+                        BoundedPlane (min, max, n, o, mat) :> Primitive))
+                        
+    let box : Parser<Primitive, scene_state> = 
         named_block "box"
             (arglist3 (named_value "min" vector)
                       (named_value "max" vector)
                       (named_value "material" material)
-                      (fun min max mat ->
-                         let b = Box {lower = min; upper = max}
-                         in { primitive = b; material = mat })) 
+                      (fun min max mat -> Box (min, max, mat) :> Primitive))
 
-    let primitive = sphere <|> plane <|> bounded_plane <|> box
+    let primitive : Parser<Primitive, scene_state> = 
+        sphere <|> plane <|> bounded_plane <|> box
 
     let store_object obj = 
         fun (stream: CharStream<scene_state>) -> 

@@ -11,6 +11,7 @@ open Affray.Colour
 open Affray.Geometry
 open Affray.Material
 open Affray.Math
+open Affray.Primitive
 open Scene
 
 module Renderer = 
@@ -27,21 +28,21 @@ module Renderer =
         Color.FromArgb(a,r,g,b)
 
     let in_shadow (s: scene) (r: ray) = 
-        let rec scan_objects (objects: obj list) (r: ray) = 
+        let rec scan_objects (objects: Primitive list) (r: ray) = 
             match objects with
             | [] -> false
             | o :: tail ->
-                match intersects r o with 
+                match o.RayIntersection r with 
                 | Some _ -> true
                 | None -> scan_objects tail r
         scan_objects s.objects r
         
     let find_closest_intersecting_object (s: scene) (r: ray) = 
-        let rec scan_objects (closest: (obj * float) option) (objects: obj list) =
+        let rec scan_objects (closest: (Primitive * float) option) (objects: Primitive list) =
             match objects with
             | [] -> closest
             | candidate :: tail -> 
-                match intersects r candidate with
+                match candidate.RayIntersection r with
                 | None -> scan_objects closest tail
                 | Some t ->
                     let min_t = match closest with 
@@ -147,8 +148,8 @@ module Renderer =
             | None -> acc + weight * (sky_value s r)
             | Some (o, t) ->
                 let pt = r.src + (t * r.direction)
-                let colour, finish = texture_point pt o.material 
-                let n = surface_normal pt o
+                let colour, finish = texture_point pt o.Material 
+                let n = o.NormalAt pt
                 let c = light_point r s pt n colour finish
                 let acc' = acc + (weight * c)
 
